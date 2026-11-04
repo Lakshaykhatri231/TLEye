@@ -1,0 +1,8 @@
+{
+ "model": "B2m (models/b2/model_monotone.txt)",
+ "fixture": "tests/fixtures/ci_subset.parquet",
+ "n": 3000,
+ "auroc": 0.7625,
+ "max_allowed_drop": 0.01,
+ "note": "AUROC on a frozen 3,000-row test-split subset; capped-sample prevalence"
+}

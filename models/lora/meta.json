@@ -1,0 +1,13 @@
+{
+ "base_model": "Qwen/Qwen2.5-Coder-0.5B",
+ "T": 1.2895386219024658,
+ "thr_f1_val": 0.3811800312995912,
+ "max_len": 1024,
+ "max_code_chars": 24000,
+ "suffix": "\n### verdict:",
+ "recipe": "LoRA r=16 alpha=32 on all attention+MLP projections, lr 1e-4, 40k train rows, 1 epoch, no symbolic prefix (kaggle/confirm/confirm.py, cfg N)",
+ "train_prevalence": 0.395,
+ "source_run": "reports/kaggle_confirm/cfgN",
+ "script_sha256": "db211fcaf231199b4dc56c02242dcf2a2664091843a7c0feec3e8f259a9af4a6",
+ "note": "probability = sigmoid(logit / T); T fit on an 8,000-row val sample; flag threshold maximises F1 on that val sample (capped-prevalence data)"
+}
