@@ -86,6 +86,18 @@ def build() -> str:
               f"N x10 at loop depth >= 2 moves the logit {dep}, the right direction and above placebo noise, but small against a logit spread of about 3. "
               + " ".join(f"{a}: mean change {b}, wrong-direction share at 0 / 0.1 / 0.5 logit {c.strip()}." for a, b, c in rows)
               + f" Doubling the time limit changes the logit by {tl.group(1).strip()} (mean absolute {tl.group(2)}), less than rewriting `2s` as `2.0s` (mean absolute {ptl.group(1)}): the model ignores the time limit."]
+    pr = Path("reports/probes.md")
+    if pr.exists():
+        cells = {c[0]: c for c in ([x.strip() for x in ln.strip("|").split("|")] for ln in pr.read_text().splitlines()
+                                   if ln.startswith("|") and ln.count("|") == 11)}
+        def probe(k, col=1):
+            return cells[k][col]
+        L += ["", "**What can be read linearly from the model's hidden states?** (reports/probes.md; rules and sites fixed in advance in reports/stage2_predeclaration.md and on validation; 8,000 test rows, 296 problems) "
+              f"Decodable means a simple linear probe recovers it, not that the model uses it. Loop depth >= 2 AUROC {probe('depth_ge2')}, recursion {probe('recursive')}, sort inside a loop {probe('sort_in_loop')}, "
+              f"log10 N R2 {probe('log10_n')}, time limit R2 {probe('log_tl')} (descriptive only, since 91.5% of rows share one limit; consistent with the time-limit result above). "
+              f"Fine-tuning made these more decodable than in the base model: log10 N {probe('log10_n', 8)}, sort inside a loop {probe('sort_in_loop', 8)}; it did not change loop depth ({probe('depth_ge2', 8)}), "
+              f"and has-a-sort got less decodable ({probe('has_sort', 8)}), no better than a bag of tokens ({probe('has_sort', 7)}). "
+              "The base model was never trained to summarize at the last token, so a gain there may only mean the information moved."]
     sd = Path("reports/seeds_test.md")
     if sd.exists():
         t = sd.read_text()
