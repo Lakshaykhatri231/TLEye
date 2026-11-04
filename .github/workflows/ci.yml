@@ -1,0 +1,15 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      TLEYE_SKIP_DOCKER: "1"      # sandbox tests need local images; run `make sandbox-test` on a machine with Docker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      # unit tests + the AUROC regression gate (tests/test_ci_gate.py: frozen fixture, committed model, ci/baseline_eval.json)
+      - run: pytest -q
