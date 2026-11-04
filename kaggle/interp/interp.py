@@ -2,7 +2,7 @@
 Two workers: `tuned` (confirmed adapter N) on one T4; `base` (untuned model, then adapter P prefix test) on the other. Inference only; dataset code is only tokenized."""
 import glob, json, os, subprocess, sys, time
 
-DRY = True
+DRY = False
 ROLE = sys.argv[sys.argv.index("--role") + 1] if "--role" in sys.argv else None
 OUT = "/kaggle/working"
 if ROLE is None:                 # ---------- LAUNCHER: exit codes are propagated, so a crashed worker fails the kernel ----------

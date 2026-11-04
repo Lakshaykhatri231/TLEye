@@ -25,3 +25,6 @@ Date: 2026-11-04, plan user-approved. Kernel: khatrilakshay2004/tleye-interp (ka
 **Self-checks that fail the run:** adapter reproduces stored confirmatory logits on 256 rows (correlation above 0.99, max difference below 0.5); 25 hidden states per forward pass; worker exit codes propagated.
 
 **Caveats in advance:** one seed; single-variable edits can create combinations unseen in training (for example A<=N with N changed), which is itself a limit of the test; capped-sample prevalence does not affect logit changes but does affect base rates.
+
+## Amendment 1 (2026-11-04, after the 48-row dry run and BEFORE the real run)
+C2's wording "absolute mean shift" was ambiguous. It now means the placebo's MEAN ABSOLUTE change (the stricter reading): a placebo can move rows up and down while averaging near zero, and that movement is the noise bar. The dry run has too few rows to inform any result; nothing else changes.

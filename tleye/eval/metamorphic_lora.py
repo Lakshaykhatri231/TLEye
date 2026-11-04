@@ -61,9 +61,9 @@ def main(d: Path, out: Path) -> None:
     va = table("val", [("n_div100", -1), ("n_div10", -1), ("n_x10", 1), ("n_x100", 1), ("n_x1000", 1), ("tl_x2", -1), ("tl_div2", 1), ("placebo_reorder", 0), ("placebo_tl", 0)])
     te = table("test", [("n_x10", 1), ("tl_x2", -1), ("placebo_reorder", 0), ("placebo_tl", 0)])
     if {"n_x10", "tl_x2", "placebo_reorder"} <= set(te) and {"n_x1000", "tl_x2"} <= set(va):
-        c = claims(te["n_x10"]["deep_lo"], te["n_x10"]["deep_mean"], abs(te["placebo_reorder"]["mean"]), te["tl_x2"]["mean"], te["tl_x2"]["hi"], va["n_x1000"].get("deep_mean", 0.0), va["tl_x2"]["mean"])
+        c = claims(te["n_x10"]["deep_lo"], te["n_x10"]["deep_mean"], te["placebo_reorder"]["abs"], te["tl_x2"]["mean"], te["tl_x2"]["hi"], va["n_x1000"].get("deep_mean", 0.0), va["tl_x2"]["mean"])
         L += ["## Claims by the pre-declared rules", "",
-              f"- At depth >= 2, N x10 mean logit change on test: {te['n_x10']['deep_mean']:+.3f} [{te['n_x10']['deep_lo']:+.3f}, {te['n_x10']['deep_hi']:+.3f}]. Reorder placebo absolute mean: {abs(te['placebo_reorder']['mean']):.3f}.",
+              f"- At depth >= 2, N x10 mean logit change on test: {te['n_x10']['deep_mean']:+.3f} [{te['n_x10']['deep_lo']:+.3f}, {te['n_x10']['deep_hi']:+.3f}]. Reorder placebo mean absolute change: {te['placebo_reorder']['abs']:.3f}.",
               f"- C1 responds to N: **{c['C1_responds_to_N']}**. C2 beyond noise: **{c['C2_beyond_noise']}**. C3 responds to the time limit: **{c['C3_responds_to_time_limit']}**.",
               f"- Stage 3 gates (val): N patching **{c['patch_gate_N']}** (N x1000 at depth >= 2: {va['n_x1000'].get('deep_mean', float('nan')):+.3f}), time-limit patching **{c['patch_gate_time_limit']}** (time limit x2: {va['tl_x2']['mean']:+.3f}).", ""]
         Path(str(out) + ".claims.json").write_text(json.dumps(c, indent=1))
