@@ -1,0 +1,15 @@
+{
+  "id": "khatrilakshay2004/tleye-b3-prompted",
+  "title": "tleye-b3-prompted",
+  "code_file": "b3.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_internet": "true",
+  "dataset_sources": [
+    "khatrilakshay2004/tleye-b3"
+  ],
+  "competition_sources": [],
+  "kernel_sources": []
+}
