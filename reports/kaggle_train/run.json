@@ -1,0 +1,18 @@
+{
+ "dry": false,
+ "model": "Qwen/Qwen2.5-Coder-0.5B",
+ "n_train": 40000,
+ "n_val": 8000,
+ "n_test": 42990,
+ "optimizer_steps": 5000,
+ "max_len": 1024,
+ "lr": 0.0002,
+ "micro_bs": 4,
+ "accum": 2,
+ "T": 1.3846304416656494,
+ "minutes": 173.4,
+ "peak_mem_GB": 3.83,
+ "torch": "2.11.0+cu128",
+ "transformers": "5.16.1",
+ "script_sha256": "bd8f9be139c1145f833a932355acecde76794ad3522e3e085d9f03f6dfa0aa52"
+}

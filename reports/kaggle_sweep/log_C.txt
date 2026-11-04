@@ -1,0 +1,85 @@
+[    0.0 min] cfg C {'lr': 0.0001, 'sym': True} | rows train/val 12000 8000 | train problems 1025 | train TLE rate 0.397 | langs {'C++': 5604, 'Python': 3790, 'Java': 2606}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[    0.2 min] tokenized | train median len 380 | share truncated 0.134
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<01:36,  2.99it/s]Loading weights:  88%|████████▊ | 256/290 [00:00<00:00, 764.05it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 624.20it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-Coder-0.5B
+Key          | Status  | 
+-------------+---------+-
+score.weight | MISSING | 
+
+Notes:
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+[    0.3 min] trainable params (M): 8.8
+[    0.3 min] training: 3000 micro-batches, 1500 optimizer steps
+[transformers] `use_return_dict` is deprecated! Use `return_dict` instead!
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+/kaggle/src/script.py:154: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  scaler.scale(loss / ACCUM).backward(); run_loss.append(float(loss))
+[    0.9 min] {'step': 25, 'loss': 0.6937259924411774, 'lr': 2.49857907618177e-05, 'min': 0.9}
+[    1.6 min] {'step': 50, 'loss': 0.6915802025794983, 'lr': 4.9881619352298945e-05, 'min': 1.6}
+[    2.2 min] {'step': 75, 'loss': 0.6352784526348114, 'lr': 7.459546607706773e-05, 'min': 2.2}
+[    2.9 min] {'step': 100, 'loss': 0.6680648374557495, 'lr': 9.903614069464625e-05, 'min': 2.9}
+[    3.7 min] {'step': 125, 'loss': 0.6677596896886826, 'lr': 9.849095995247279e-05, 'min': 3.7}
+[    4.5 min] {'step': 150, 'loss': 0.6798721987009049, 'lr': 9.782657351208917e-05, 'min': 4.5}
+[    5.2 min] {'step': 175, 'loss': 0.6821909803152084, 'lr': 9.704480241054755e-05, 'min': 5.2}
+[    5.8 min] {'step': 200, 'loss': 0.6935025465488434, 'lr': 9.614778942809699e-05, 'min': 5.8}
+[    6.6 min] {'step': 225, 'loss': 0.6687296199798584, 'lr': 9.513799321497178e-05, 'min': 6.6}
+[    7.2 min] {'step': 250, 'loss': 0.6908068680763244, 'lr': 9.401818155240205e-05, 'min': 7.2}
+[    7.8 min] {'step': 275, 'loss': 0.6719042140245438, 'lr': 9.279142376631773e-05, 'min': 7.8}
+[    8.6 min] {'step': 300, 'loss': 0.6656710097193718, 'lr': 9.14610823145396e-05, 'min': 8.6}
+[    9.2 min] {'step': 325, 'loss': 0.6781442660093308, 'lr': 9.003080357051607e-05, 'min': 9.2}
+[    9.9 min] {'step': 350, 'loss': 0.6657120227813721, 'lr': 8.850450782886703e-05, 'min': 9.9}
+[   10.6 min] {'step': 375, 'loss': 0.6187756949663162, 'lr': 8.688637856012889e-05, 'min': 10.6}
+[   11.2 min] {'step': 400, 'loss': 0.6837053948640823, 'lr': 8.518085094415242e-05, 'min': 11.2}
+[   11.8 min] {'step': 425, 'loss': 0.6178540503978729, 'lr': 8.339259971358324e-05, 'min': 11.8}
+[   12.4 min] {'step': 450, 'loss': 0.610177253484726, 'lr': 8.152652634074454e-05, 'min': 12.4}
+[   13.0 min] {'step': 475, 'loss': 0.6295549100637436, 'lr': 7.958774560304213e-05, 'min': 13.0}
+[   13.7 min] {'step': 500, 'loss': 0.6221034082770348, 'lr': 7.758157156371498e-05, 'min': 13.7}
+[   14.3 min] {'step': 525, 'loss': 0.5637510988116264, 'lr': 7.55135030063575e-05, 'min': 14.3}
+[   15.0 min] {'step': 550, 'loss': 0.609651874601841, 'lr': 7.338920836313572e-05, 'min': 15.0}
+[   15.7 min] {'step': 575, 'loss': 0.5892409259080886, 'lr': 7.121451017800877e-05, 'min': 15.7}
+[   16.4 min] {'step': 600, 'loss': 0.5732712811231613, 'lr': 6.899536914754067e-05, 'min': 16.4}
+[   16.9 min] {'step': 625, 'loss': 0.5993918281793594, 'lr': 6.673786778304537e-05, 'min': 16.9}
+[   17.6 min] {'step': 650, 'loss': 0.6170100796222687, 'lr': 6.444819373884592e-05, 'min': 17.6}
+[   18.3 min] {'step': 675, 'loss': 0.6299013954401016, 'lr': 6.213262285234418e-05, 'min': 18.3}
+[   19.1 min] {'step': 700, 'loss': 0.5740202118456363, 'lr': 5.97975019423867e-05, 'min': 19.1}
+[   19.9 min] {'step': 725, 'loss': 0.5865011945366859, 'lr': 5.7449231413075414e-05, 'min': 19.9}
+[   20.6 min] {'step': 750, 'loss': 0.5416649904847145, 'lr': 5.509424771070487e-05, 'min': 20.6}
+[   20.6 min] early check at step 750: mean loss of last 200 micro-batches = 0.5830 (abort if > 0.680)
+[   21.3 min] {'step': 775, 'loss': 0.6166699466109276, 'lr': 5.273900568191037e-05, 'min': 21.3}
+[   21.9 min] {'step': 800, 'loss': 0.5871120125055314, 'lr': 5.0389960881381984e-05, 'min': 21.9}
+[   22.5 min] {'step': 825, 'loss': 0.559824845790863, 'lr': 4.8053551877637816e-05, 'min': 22.5}
+[   23.3 min] {'step': 850, 'loss': 0.5263469189405441, 'lr': 4.573618260535535e-05, 'min': 23.3}
+[   23.9 min] {'step': 875, 'loss': 0.538945452272892, 'lr': 4.344420481263155e-05, 'min': 23.9}
+[   24.6 min] {'step': 900, 'loss': 0.5011462955176831, 'lr': 4.118390065128287e-05, 'min': 24.6}
+[   25.3 min] {'step': 925, 'loss': 0.5399058195948601, 'lr': 3.8961465457903715e-05, 'min': 25.3}
+[   25.9 min] {'step': 950, 'loss': 0.535672310590744, 'lr': 3.678299077287961e-05, 'min': 25.9}
+[   26.5 min] {'step': 975, 'loss': 0.5176224836707115, 'lr': 3.465444764389824e-05, 'min': 26.5}
+[   27.2 min] {'step': 1000, 'loss': 0.5486656095087529, 'lr': 3.258167025972292e-05, 'min': 27.2}
+[   27.9 min] {'step': 1025, 'loss': 0.4792220710963011, 'lr': 3.057033995908673e-05, 'min': 27.9}
+[   28.5 min] {'step': 1050, 'loss': 0.4987426635622978, 'lr': 2.862596965853781e-05, 'min': 28.5}
+[   29.3 min] {'step': 1075, 'loss': 0.5317536368966103, 'lr': 2.6753888741918488e-05, 'min': 29.3}
+[   29.9 min] {'step': 1100, 'loss': 0.47372858203947543, 'lr': 2.4959228452894425e-05, 'min': 29.9}
+[   30.5 min] {'step': 1125, 'loss': 0.4988280987739563, 'lr': 2.3246907830572585e-05, 'min': 30.5}
+[   31.1 min] {'step': 1150, 'loss': 0.4780623808503151, 'lr': 2.1621620226756745e-05, 'min': 31.1}
+[   31.8 min] {'step': 1175, 'loss': 0.560459030866623, 'lr': 2.0087820441796636e-05, 'min': 31.8}
+[   32.6 min] {'step': 1200, 'loss': 0.5489963105320931, 'lr': 1.8649712514289713e-05, 'min': 32.6}
+[   33.2 min] {'step': 1225, 'loss': 0.5010724322497845, 'lr': 1.7311238198103627e-05, 'min': 33.2}
+[   33.8 min] {'step': 1250, 'loss': 0.4975267920643091, 'lr': 1.6076066158302815e-05, 'min': 33.8}
+[   34.5 min] {'step': 1275, 'loss': 0.5306722551584244, 'lr': 1.4947581915592648e-05, 'min': 34.5}
+[   35.3 min] {'step': 1300, 'loss': 0.5100707817077637, 'lr': 1.3928878566842376e-05, 'min': 35.3}
+[   36.0 min] {'step': 1325, 'loss': 0.5069512641429901, 'lr': 1.3022748307121752e-05, 'min': 36.0}
+[   36.8 min] {'step': 1350, 'loss': 0.5370657259970903, 'lr': 1.2231674776488309e-05, 'min': 36.8}
+[   37.5 min] {'step': 1375, 'loss': 0.53353519231081, 'lr': 1.1557826252502677e-05, 'min': 37.5}
+[   38.1 min] {'step': 1400, 'loss': 0.5063115772604942, 'lr': 1.1003049707130459e-05, 'min': 38.1}
+[   38.8 min] {'step': 1425, 'loss': 0.4905301132798195, 'lr': 1.0568865744320483e-05, 'min': 38.8}
+[   39.6 min] {'step': 1450, 'loss': 0.4997322428226471, 'lr': 1.0256464432135048e-05, 'min': 39.6}
+[   40.3 min] {'step': 1475, 'loss': 0.5683591639995575, 'lr': 1.0066702040856108e-05, 'min': 40.3}
+[   41.0 min] {'step': 1500, 'loss': 0.49211852103471754, 'lr': 1.0000098696007932e-05, 'min': 41.0}
+[   41.0 min] adapter saved; peak mem GB 2.37
+[   41.0 min]   predict 0/8000
+[   46.2 min]   predict 3200/8000
+[   47.6 min]   predict 6400/8000
+[   47.9 min] RESULT {"cfg": "C", "lr": 0.0001, "sym": true, "dry": false, "n_train": 12000, "n_val": 8000, "optimizer_steps": 1500, "val_auroc": 0.8356018246689849, "val_auprc": 0.7362585899624292, "val_bce_after_T": 0.4800017774105072, "val_const_guess_bce": 0.6611146318945779, "T": 1.144503116607666, "final_train_loss_last100": 0.5302388425171375, "minutes": 47.9, "peak_mem_GB": 3.83, "script_sha256": "33c9641c6a0d8a37a20e72ad4af54617f3690070bcf0eb343232b42e687e7b39"}
+[   47.9 min] DONE

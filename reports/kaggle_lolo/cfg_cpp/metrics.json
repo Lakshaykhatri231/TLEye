@@ -1,0 +1,19 @@
+{
+ "cfg": "cpp",
+ "lr": 0.0001,
+ "sym": false,
+ "held": "C++",
+ "dry": false,
+ "n_train": 20000,
+ "n_val": 8000,
+ "optimizer_steps": 2500,
+ "val_auroc": 0.8800471093100782,
+ "val_auprc": 0.8143600940612027,
+ "val_bce_after_T": 0.41149431467056274,
+ "val_const_guess_bce": 0.6487521821263491,
+ "T": 1.346753716468811,
+ "final_train_loss_last100": 0.45421925774775446,
+ "minutes": 63.9,
+ "peak_mem_GB": 3.84,
+ "script_sha256": "4e36367cb6a37e3cfd133017c9766fdaea91f4e05831071cfb4847d248f44a34"
+}

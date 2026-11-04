@@ -1,0 +1,44 @@
+problem_id,rt,status_now,kind,err
+p03780,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 1, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p03066,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 6, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p02978,PyPy,inconclusive,other/empty: Warning: cannot find your CPU L2 & L3 cache size in /sys/dev,"Warning: cannot find your CPU L2 & L3 cache size in /sys/devices/system/cpu/cpuX/cache   File ""/w/main.py"", line 25     print sum(l)     ^^^^^^^^^^^^ SyntaxError: Missing parentheses in call to 'print"
+p02824,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 2, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p03953,PyPy,inconclusive,other/empty: Warning: cannot find your CPU L2 & L3 cache size in /sys/dev,"Warning: cannot find your CPU L2 & L3 cache size in /sys/devices/system/cpu/cpuX/cache   File ""/w/main.py"", line 19     print w     ^^^^^^^ SyntaxError: Missing parentheses in call to 'print'. Did you"
+p03953,PyPy,inconclusive,other/empty: Warning: cannot find your CPU L2 & L3 cache size in /sys/dev,"Warning: cannot find your CPU L2 & L3 cache size in /sys/devices/system/cpu/cpuX/cache   File ""/w/main.py"", line 75     print float(x)     ^^^^^^^^^^^^^^ SyntaxError: Missing parentheses in call to 'p"
+p03953,PyPy,inconclusive,other/empty: Warning: cannot find your CPU L2 & L3 cache size in /sys/dev,"Warning: cannot find your CPU L2 & L3 cache size in /sys/devices/system/cpu/cpuX/cache   File ""/w/main.py"", line 75     print float(x)     ^^^^^^^^^^^^^^ SyntaxError: Missing parentheses in call to 'p"
+p03953,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 1, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p03953,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 9, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p03953,Python,inconclusive,"other/empty: File ""/w/main.py"", line 18     print""\n"".join(map(str,X))   ","File ""/w/main.py"", line 18     print""\n"".join(map(str,X))     ^^^^^^^^^^^^^^^^^^^^^^^^^^ SyntaxError: Missing parentheses in call to 'print'. Did you mean print(...)?"
+p03953,Python,inconclusive,"other/empty: File ""/w/main.py"", line 34     print i     ^^^^^^^ SyntaxErr","File ""/w/main.py"", line 34     print i     ^^^^^^^ SyntaxError: Missing parentheses in call to 'print'. Did you mean print(...)?"
+p03772,C++,inconclusive,other/empty: timeout: the monitored command dumped core,timeout: the monitored command dumped core
+p02595,Python,inconclusive,now-inconclusive,
+p02595,Python,inconclusive,now-inconclusive,
+p02595,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 1, in <module>     from scipy.spatial import distance ModuleNotFoundError: No module named 'scipy'"
+p02595,Python,inconclusive,now-inconclusive,
+p02665,Java,inconclusive,Java exception,"Exception in thread ""main"" java.lang.ArrayIndexOutOfBoundsException: Index 100000 out of bounds for length 100000 	at Main.main(Main.java:27)"
+p02665,Java,inconclusive,Java exception,"Exception in thread ""main"" java.lang.ArrayIndexOutOfBoundsException: Index 100000 out of bounds for length 100000 	at Main.read(Main.java:23) 	at Main.main(Main.java:13)"
+p02665,Java,inconclusive,Java exception,"Exception in thread ""main"" java.lang.ArrayIndexOutOfBoundsException: Index 100000 out of bounds for length 100000 	at Main.read(Main.java:23) 	at Main.main(Main.java:13)"
+p02665,PyPy,inconclusive,IndexError,"cannot find your CPU L2 & L3 cache size in /sys/devices/system/cpu/cpuX/cache Traceback (most recent call last):   File ""/w/main.py"", line 7, in <module>     if A[k] >= capacity[k] and k!= N:        ^"
+p02665,PyPy,inconclusive,IndexError,"he Traceback (most recent call last):   File ""/w/main.py"", line 37, in <module>     print(main())           ^^^^^^   File ""/w/main.py"", line 5, in main     if N == 0 and P[0] == 1:                   ^"
+p02665,PyPy,inconclusive,IndexError,"Warning: cannot find your CPU L2 & L3 cache size in /sys/devices/system/cpu/cpuX/cache Traceback (most recent call last):   File ""/w/main.py"", line 12, in <module>     total += A[i]              ^^^^ "
+p02665,PyPy,inconclusive,other/empty: Warning: cannot find your CPU L2 & L3 cache size in /sys/dev,Warning: cannot find your CPU L2 & L3 cache size in /sys/devices/system/cpu/cpuX/cache
+p02665,Python,inconclusive,IndexError,"Traceback (most recent call last):   File ""/w/main.py"", line 24, in <module>     if x!=a[-1] or x<=0:           ~^^^^ IndexError: list index out of range"
+p02665,Python,inconclusive,IndexError,"Traceback (most recent call last):   File ""/w/main.py"", line 27, in <module>     child = min(child, miki[i]) + A[i]                        ~~~~^^^ IndexError: list index out of range"
+p02665,Python,inconclusive,IndexError,"Traceback (most recent call last):   File ""/w/main.py"", line 8, in <module>     bottom_n_list[n] = (a[n], a[n])                         ~^^^ IndexError: list index out of range"
+p02665,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 52, in <module>     main()   File ""/w/main.py"", line 2, in main     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p03064,PyPy,certified,now-certified,
+p03064,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 1, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p03064,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 1, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p03064,Python,inconclusive,"other/empty: File ""/w/main.py"", line 8     exec'''a=input();s+=a;i=s;z*=3","File ""/w/main.py"", line 8     exec'''a=input();s+=a;i=s;z*=3     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SyntaxError: Missing parentheses in call to 'exec'. Did you mean exec(...)?"
+p03782,PyPy,inconclusive,other/empty: Warning: cannot find your CPU L2 & L3 cache size in /sys/dev,Warning: cannot find your CPU L2 & L3 cache size in /sys/devices/system/cpu/cpuX/cache
+p02821,C++,inconclusive,other/empty: ,
+p02821,C++,inconclusive,other/empty: ,
+p02821,Java,inconclusive,other/empty: ,
+p02821,PyPy,inconclusive,other/empty: Warning: cannot find your CPU L2 & L3 cache size in /sys/dev,Warning: cannot find your CPU L2 & L3 cache size in /sys/devices/system/cpu/cpuX/cache
+p02821,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 2, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p02821,Python,inconclusive,other/empty: ,
+p03839,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 4, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p03989,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 7, in <module>     import numpy as np ModuleNotFoundError: No module named 'numpy'"
+p03989,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 2, in <module>     import numpy ModuleNotFoundError: No module named 'numpy'"
+p02943,Python,inconclusive,ValueError/int parse,"Traceback (most recent call last):   File ""/w/main.py"", line 6, in <module>     i=min(i for i in range(n) if c!=ans[i])       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ValueError: min() arg is an empty se"
+p03553,Python,inconclusive,"other/empty: Traceback (most recent call last):   File ""/w/main.py"", line","Traceback (most recent call last):   File ""/w/main.py"", line 3, in <module>     from scipy.sparse.csgraph import dijkstra ModuleNotFoundError: No module named 'scipy'"

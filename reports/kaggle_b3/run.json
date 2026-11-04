@@ -1,0 +1,10 @@
+{
+ "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+ "dry": false,
+ "n": 400,
+ "minutes": 16.0,
+ "mean_yes_no_mass_A": 0.9993454472720623,
+ "mean_yes_no_mass_B": 0.9993264101445675,
+ "n_trunc_retries": 1,
+ "script_sha256": "960265f0df2fe434b1a367806dcf721f48fa9aa5bc0dc7171d33a13fdff62932"
+}

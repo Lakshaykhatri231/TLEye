@@ -1,0 +1,19 @@
+{
+ "cfg": "java",
+ "lr": 0.0001,
+ "sym": false,
+ "held": "Java",
+ "dry": false,
+ "n_train": 20000,
+ "n_val": 8000,
+ "optimizer_steps": 2500,
+ "val_auroc": 0.8629454340195958,
+ "val_auprc": 0.8038033432207458,
+ "val_bce_after_T": 0.4452301561832428,
+ "val_const_guess_bce": 0.6671567199328997,
+ "T": 1.244581699371338,
+ "final_train_loss_last100": 0.46435580870136617,
+ "minutes": 65.0,
+ "peak_mem_GB": 3.84,
+ "script_sha256": "4e36367cb6a37e3cfd133017c9766fdaea91f4e05831071cfb4847d248f44a34"
+}

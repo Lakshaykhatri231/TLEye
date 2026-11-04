@@ -1,0 +1,64 @@
+{
+ "gpu": "Tesla T4",
+ "n_gpu": 2,
+ "max_len": 1024,
+ "batch": 4,
+ "results": [
+  {
+   "model": "Qwen/Qwen2.5-Coder-0.5B",
+   "tok_len_median": 331,
+   "tok_len_p90": 1065,
+   "share_over_max": 0.11,
+   "trainable_params_M": 8.8,
+   "steps_measured": 10,
+   "sec_per_step": 0.943,
+   "real_tokens_per_sec": 1701,
+   "rows_per_sec": 4.24,
+   "peak_mem_GB": 1.86,
+   "losses": [
+    6.135,
+    5.732,
+    2.102,
+    2.242,
+    0.012,
+    0.0,
+    7.605,
+    3.301,
+    9.772,
+    7.004,
+    3.448,
+    4.416
+   ],
+   "hours_per_40k_rows": 2.62,
+   "hours_per_142k_train_rows": 9.33
+  },
+  {
+   "model": "Qwen/Qwen2.5-Coder-1.5B",
+   "tok_len_median": 331,
+   "tok_len_p90": 1065,
+   "share_over_max": 0.11,
+   "trainable_params_M": 18.47,
+   "steps_measured": 10,
+   "sec_per_step": 2.267,
+   "real_tokens_per_sec": 707,
+   "rows_per_sec": 1.76,
+   "peak_mem_GB": 4.67,
+   "losses": [
+    1.009,
+    1.556,
+    0.344,
+    0.836,
+    0.569,
+    0.021,
+    2.018,
+    1.289,
+    3.115,
+    1.094,
+    0.934,
+    0.995
+   ],
+   "hours_per_40k_rows": 6.31,
+   "hours_per_142k_train_rows": 22.47
+  }
+ ]
+}

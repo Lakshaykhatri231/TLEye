@@ -1,0 +1,19 @@
+{
+ "cfg": "s1",
+ "lr": 0.0001,
+ "sym": false,
+ "seed": 1,
+ "dry": false,
+ "n_train": 40000,
+ "n_val": 8000,
+ "optimizer_steps": 5000,
+ "val_auroc": 0.8896866792006015,
+ "val_auprc": 0.836741362804901,
+ "val_bce_after_T": 0.398171603679657,
+ "val_const_guess_bce": 0.6574078084727233,
+ "T": 1.403159260749817,
+ "final_train_loss_last100": 0.48340830005705354,
+ "minutes": 135.0,
+ "peak_mem_GB": 3.83,
+ "script_sha256": "75e3d68daee1e968a9d95e03ce0d9634572395d5ae8115ae6b6722440fef72ad"
+}

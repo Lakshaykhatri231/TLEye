@@ -1,0 +1,13 @@
+n 42990 | Spearman(LoRA, B2) = 0.539
+
+AUROC by code-length quartile (test):
+  Q1 shortest  n=10762 chars     19-   486  LoRA 0.739  B2 0.835
+  Q2           n=10734 chars    487-   977  LoRA 0.654  B2 0.789
+  Q3           n=10750 chars    978-  1992  LoRA 0.616  B2 0.700
+  Q4 longest   n=10744 chars   1993-270078  LoRA 0.618  B2 0.685
+
+AUROC by loop depth (test):
+  depth 0: n= 4256  LoRA 0.795  B2 0.863
+  depth 1: n=18593  LoRA 0.631  B2 0.726
+  depth 2: n=15126  LoRA 0.605  B2 0.723
+  depth 3: n= 5015  LoRA 0.611  B2 0.739
