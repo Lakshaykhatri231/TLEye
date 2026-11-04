@@ -1,0 +1,17 @@
+{
+  "id": "khatrilakshay2004/tleye-sft",
+  "title": "tleye-sft",
+  "code_file": "sft.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_internet": "true",
+  "dataset_sources": [
+    "khatrilakshay2004/tleye-data",
+    "khatrilakshay2004/tleye-sidecar",
+    "khatrilakshay2004/tleye-adapters"
+  ],
+  "competition_sources": [],
+  "kernel_sources": []
+}
