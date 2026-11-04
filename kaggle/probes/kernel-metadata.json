@@ -1,0 +1,18 @@
+{
+  "id": "khatrilakshay2004/tleye-probes",
+  "title": "tleye-probes",
+  "code_file": "probes.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "false",
+  "enable_internet": "false",
+  "dataset_sources": [
+    "khatrilakshay2004/tleye-data",
+    "khatrilakshay2004/tleye-sidecar"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [
+    "khatrilakshay2004/tleye-interp"
+  ]
+}

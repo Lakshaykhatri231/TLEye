@@ -48,3 +48,10 @@ def test_controls_break_the_right_structure():
 
 def test_holm_on_known_values():
     assert np.allclose(pl.holm([0.01, 0.04, 0.03]), [0.03, 0.06, 0.06])
+
+
+def test_principal_component_limit_still_recovers_a_low_rank_signal():
+    rng = np.random.default_rng(2); n, g = 800, np.repeat(np.arange(40), 20)
+    z = rng.normal(size=(n, 3)); X = z @ rng.normal(size=(3, 60)) + 0.01 * rng.normal(size=(n, 60)); y = z[:, 0] + 0.1 * rng.normal(size=n)
+    _, sc, _ = pl.cv_select(X, y, g, "numeric", keep=5)
+    assert sc > 0.9

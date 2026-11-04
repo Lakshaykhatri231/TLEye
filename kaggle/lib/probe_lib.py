@@ -15,10 +15,13 @@ def group_folds(groups, k=5, seed=0):
 class Ridge:
     """Multi-alpha ridge through an SVD of the standardized training matrix."""
 
-    def __init__(self, X):
+    def __init__(self, X, keep=None):
+        """keep = number of principal components (for problem-level targets, where 896 features would overfit about 150 problems)."""
         self.mu, self.sd = X.mean(0), X.std(0) + 1e-6
         Z = (X - self.mu) / self.sd
         self.U, self.s, self.Vt = np.linalg.svd(Z, full_matrices=False)
+        if keep is not None:
+            self.U, self.s, self.Vt = self.U[:, :keep], self.s[:keep], self.Vt[:keep]
 
     def predict(self, y, Xq, alpha):
         ym = y.mean(); d = self.s / (self.s ** 2 + alpha)
@@ -60,12 +63,12 @@ def score(kind, y, p, groups=None):
     return auroc(y, p) if kind == "binary" else r2(y, p)
 
 
-def cv_select(X, y, groups, kind, k=5, alphas=ALPHAS):
+def cv_select(X, y, groups, kind, k=5, alphas=ALPHAS, keep=None):
     """Best alpha by grouped CV: returns (alpha, cv score, out-of-fold predictions at that alpha)."""
     folds = group_folds(groups, k); oof = {a: np.zeros(len(y)) for a in alphas}
     for f in range(k):
         tr, te = folds != f, folds == f
-        m = Ridge(X[tr])
+        m = Ridge(X[tr], keep)
         for a in alphas:
             oof[a][te] = m.predict(y[tr], X[te], a)
     sc = {a: score(kind, y, oof[a], groups) for a in alphas}
