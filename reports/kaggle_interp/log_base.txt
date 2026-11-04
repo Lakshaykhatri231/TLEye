@@ -1,0 +1,36 @@
+[   0.3 min] val 8000 test 8000 | role base
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<03:46,  1.27it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 352.46it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-Coder-0.5B
+Key          | Status  | 
+-------------+---------+-
+score.weight | MISSING | 
+
+Notes:
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+[   1.0 min]   hidden base_val 1000/8000
+[   1.6 min]   hidden base_val 2000/8000
+[   2.2 min]   hidden base_val 3000/8000
+[   2.7 min]   hidden base_val 4000/8000
+[   3.2 min]   hidden base_val 5000/8000
+[   3.8 min]   hidden base_val 6000/8000
+[   4.3 min]   hidden base_val 7000/8000
+[   4.9 min]   hidden base_val 8000/8000
+[   5.6 min]   hidden base_test 1000/8000
+[   6.2 min]   hidden base_test 2000/8000
+[   6.9 min]   hidden base_test 3000/8000
+[   7.5 min]   hidden base_test 4000/8000
+[   8.1 min]   hidden base_test 5000/8000
+[   8.8 min]   hidden base_test 6000/8000
+[   9.4 min]   hidden base_test 7000/8000
+[  10.0 min]   hidden base_test 8000/8000
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<01:46,  2.71it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 710.46it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-Coder-0.5B
+Key          | Status  | 
+-------------+---------+-
+score.weight | MISSING | 
+
+Notes:
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+[  18.1 min] prefix test done
+[  18.1 min] DONE

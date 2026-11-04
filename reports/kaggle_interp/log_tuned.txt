@@ -1,0 +1,41 @@
+[   0.3 min] val 8000 test 8000 | role tuned
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<04:02,  1.19it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 340.86it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-Coder-0.5B
+Key          | Status  | 
+-------------+---------+-
+score.weight | MISSING | 
+
+Notes:
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+[   0.7 min] parity 0.02392578125 0.9999993516862923
+[   5.2 min]   val n_div100: 2383 rows
+[   7.1 min]   val n_div10: 2383 rows
+[   9.0 min]   val n_x10: 2383 rows
+[  11.0 min]   val n_x100: 2383 rows
+[  12.9 min]   val n_x1000: 2383 rows
+[  15.1 min]   val tl_x2: 3000 rows
+[  17.3 min]   val tl_div2: 3000 rows
+[  18.8 min]   val placebo_reorder: 1892 rows
+[  21.0 min]   val placebo_tl: 3000 rows
+[  28.9 min]   test n_x10: 4325 rows
+[  33.1 min]   test tl_x2: 5000 rows
+[  36.1 min]   test placebo_reorder: 3443 rows
+[  40.3 min]   test placebo_tl: 5000 rows
+[  41.1 min]   hidden tuned_val 1000/8000
+[  41.8 min]   hidden tuned_val 2000/8000
+[  42.6 min]   hidden tuned_val 3000/8000
+[  43.3 min]   hidden tuned_val 4000/8000
+[  44.0 min]   hidden tuned_val 5000/8000
+[  44.7 min]   hidden tuned_val 6000/8000
+[  45.5 min]   hidden tuned_val 7000/8000
+[  46.2 min]   hidden tuned_val 8000/8000
+[  47.2 min]   hidden tuned_test 1000/8000
+[  48.0 min]   hidden tuned_test 2000/8000
+[  48.9 min]   hidden tuned_test 3000/8000
+[  49.7 min]   hidden tuned_test 4000/8000
+[  50.6 min]   hidden tuned_test 5000/8000
+[  51.4 min]   hidden tuned_test 6000/8000
+[  52.3 min]   hidden tuned_test 7000/8000
+[  53.1 min]   hidden tuned_test 8000/8000
+[  53.1 min] DONE

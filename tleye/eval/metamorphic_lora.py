@@ -22,6 +22,35 @@ def load_variant(d: Path, split: str, name: str):
     return pd.Series(z["logit"], index=z["submission_id"])
 
 
+def b2m_rows(d: Path, te: dict) -> list[str]:
+    """Pre-declared comparison: B2m's wrong-direction share for N x10 on the SAME test rows (same one-variable edit, applied to its features)."""
+    if "n_x10" not in te or not Path("models/b2/model_monotone.txt").exists():
+        return []
+    import lightgbm as lgb
+
+    from tleye.models.baselines import add_est, load
+    meta = __import__("json").loads(Path("models/b2/meta_monotone.json").read_text()); cols, fill = meta["cols"], meta["fill_log10_primary"]
+    idx = load_variant(d, "test", "n_x10").index
+    x = load(); x = add_est(x, fill)
+    x["lang_cpp"], x["lang_java"], x["lang_py"] = (x.language == "C++").astype(int), (x.language == "Java").astype(int), (x.language == "Python").astype(int)
+    x = x.set_index("submission_id").loc[idx].copy()
+    m = lgb.Booster(model_file="models/b2/model_monotone.txt")
+    p0 = np.clip(m.predict(x[cols]), 1e-6, 1 - 1e-6)
+    y = x.copy()
+    known = y.log10_primary.notna()
+    y.loc[known, "log10_primary"] += 1.0
+    for c in ("log10_max_bound", "log10_size"):
+        y[c] = np.maximum(y[c].fillna(-1e9), y.log10_primary.fillna(-1e9)).where(y[c].notna() | known)
+    y = add_est(y, fill)
+    p1 = np.clip(m.predict(y[cols]), 1e-6, 1 - 1e-6)
+    dl = (np.log(p1 / (1 - p1)) - np.log(p0 / (1 - p0)))[known.values]
+    v = {t: float((dl < -t).mean()) for t in (0.0, 0.1, 0.5)}
+    r = te["n_x10"]["viol"]
+    return ["## N x10 on the same test rows: LoRA vs B2m (logit scale)", "", "| model | n | mean logit change | wrong-direction share at 0 / 0.1 / 0.5 logit |", "|---|---|---|---|",
+            f"| LoRA (seed 0) | {te['n_x10']['n']} | {te['n_x10']['mean']:+.3f} | {r[0.0]:.1%} / {r[0.1]:.1%} / {r[0.5]:.1%} |",
+            f"| B2m (monotone by construction) | {int(known.sum())} | {dl.mean():+.3f} | {v[0.0]:.1%} / {v[0.1]:.1%} / {v[0.5]:.1%} |", ""]
+
+
 def main(d: Path, out: Path) -> None:
     meta = pd.read_parquet("data/processed/features_clean.parquet", columns=["submission_id", "problem_id", "language", "y_tle", "max_loop_depth"]).set_index("submission_id")
     L = ["# LoRA metamorphic checks (script-generated; follows reports/stage1_predeclaration.md)", ""]
@@ -67,6 +96,7 @@ def main(d: Path, out: Path) -> None:
               f"- C1 responds to N: **{c['C1_responds_to_N']}**. C2 beyond noise: **{c['C2_beyond_noise']}**. C3 responds to the time limit: **{c['C3_responds_to_time_limit']}**.",
               f"- Stage 3 gates (val): N patching **{c['patch_gate_N']}** (N x1000 at depth >= 2: {va['n_x1000'].get('deep_mean', float('nan')):+.3f}), time-limit patching **{c['patch_gate_time_limit']}** (time limit x2: {va['tl_x2']['mean']:+.3f}).", ""]
         Path(str(out) + ".claims.json").write_text(json.dumps(c, indent=1))
+    L += b2m_rows(d, te)
     pf = d / "meta" / "prefix_test.npz"
     if pf.exists():
         z = np.load(pf); t = z["true"]; yy = meta.loc[z["submission_id"]].y_tle.values

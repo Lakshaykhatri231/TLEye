@@ -17,3 +17,4 @@ models/lora/adapter_model.safetensors
 reports/*_smoke*/
 reports/kaggle_train_dry/
 reports/*.log
+reports/kaggle_interp/hidden/

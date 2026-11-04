@@ -75,6 +75,17 @@ def build() -> str:
         L += ["", "**Learning-rate sweep, VALIDATION only** (reports/lr_sweep.md; 12,000 training rows, lr 5e-5 to 1e-4; paired AUROC difference, LoRA minus B2m): "
               f"A {pairs['A - B2m']}, B {pairs['B - B2m']}, C {pairs['C - B2m']}. The configs themselves are not separable "
               f"(prefix B-A {pairs['B - A']}, lr C-B {pairs['C - B']}). A confirmatory test-split run is pending."]
+    ml = Path("reports/metamorphic_lora.md")
+    if ml.exists():
+        t = ml.read_text()
+        dep = re.search(r"At depth >= 2, N x10 mean logit change on test: ([^.]+\.\d+ \[[^\]]+\])", t).group(1)
+        rows = re.findall(r"\| (LoRA \(seed 0\)|B2m \(monotone by construction\)) \| \d+ \| ([+\-\d.]+) \| ([^|]+) \|", t)
+        tl = re.search(r"\| tl_x2 \| 5000 \| \d+ \| ([^|]+) \| ([\d.]+) \|", t)
+        ptl = re.search(r"\| placebo_tl \| 5000 \| \d+ \| [^|]+ \| ([\d.]+) \|", t)
+        L += ["", "**Does the LoRA model react to the constraints?** (reports/metamorphic_lora.md; rules fixed in advance in reports/stage1_predeclaration.md; same code, one change to the prompt) "
+              f"N x10 at loop depth >= 2 moves the logit {dep}, the right direction and above placebo noise, but small against a logit spread of about 3. "
+              + " ".join(f"{a}: mean change {b}, wrong-direction share at 0 / 0.1 / 0.5 logit {c.strip()}." for a, b, c in rows)
+              + f" Doubling the time limit changes the logit by {tl.group(1).strip()} (mean absolute {tl.group(2)}), less than rewriting `2s` as `2.0s` (mean absolute {ptl.group(1)}): the model ignores the time limit."]
     sd = Path("reports/seeds_test.md")
     if sd.exists():
         t = sd.read_text()

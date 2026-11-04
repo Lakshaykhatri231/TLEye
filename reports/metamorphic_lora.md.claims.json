@@ -1,0 +1,7 @@
+{
+ "C1_responds_to_N": true,
+ "C2_beyond_noise": true,
+ "C3_responds_to_time_limit": false,
+ "patch_gate_N": false,
+ "patch_gate_time_limit": false
+}

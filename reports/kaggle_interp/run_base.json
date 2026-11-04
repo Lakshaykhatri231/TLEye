@@ -1,0 +1,22 @@
+{
+ "role": "base",
+ "dry": false,
+ "minutes": 18.1,
+ "peak_mem_GB": 5.28,
+ "script_sha256": "b165813212aca9622750214f1efb61ce2e460b97461c1acbb0934dcb6e560fae",
+ "lib_sha256": "f1d323b7105432add0855735bbe23cea2454b090b2d92fa69779460c66de7985",
+ "layers": [
+  0,
+  4,
+  8,
+  12,
+  16,
+  20,
+  24
+ ],
+ "pool_layers": [
+  0,
+  12,
+  24
+ ]
+}
