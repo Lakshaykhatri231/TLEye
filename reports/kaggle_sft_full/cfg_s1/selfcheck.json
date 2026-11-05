@@ -1,0 +1,12 @@
+{
+ "cfg": "s1",
+ "dry": false,
+ "steps": 5000,
+ "total_steps": 5000,
+ "reload_max_abs_v0": 0.0,
+ "gen_text_differs_share": 0.015625,
+ "gen_checked_rows": 64,
+ "gen_batched_equals_single": false,
+ "gen_v1_max_abs": 0.01123046875,
+ "forced_vs_stepwise_max_abs": 0.0078125
+}

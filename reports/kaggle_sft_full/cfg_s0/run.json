@@ -1,0 +1,13 @@
+{
+ "cfg": "s0",
+ "mode": "dual",
+ "seed": 0,
+ "stage": "full",
+ "dry": false,
+ "n_train": 40000,
+ "steps": 5000,
+ "minutes": 259.0,
+ "peak_mem_GB": 4.79,
+ "script_sha256": "2f5af52f3a7e2b4aa97d794ea5823423f07735bf61053b7fc9d44b1e19faf1cc",
+ "lib_sha256": "80e863596a34dc561367ca915d67a10fb8b4d5ebf0909287c9d9d5ec783b5897"
+}
