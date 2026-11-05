@@ -19,3 +19,4 @@ reports/kaggle_train_dry/
 reports/*.log
 reports/kaggle_interp/hidden/
 reports/kaggle_sft_dry/
+reports/**/heads.pt
