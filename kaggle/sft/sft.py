@@ -2,7 +2,7 @@
 classifier's `\\n### verdict:`. Readout v0 at that `:` (zero-initialized head). Then a forced template with model-filled values, `\\ntle:`, readout v1. Dataset code is only tokenized."""
 import copy, glob, json, math, os, random, subprocess, sys, time
 
-DRY = True
+DRY = False
 STAGE = "full"                     # "gate" = 12k rows, val only; "full" = 40k rows, val then test
 FULL_MODE = "dual"
 CFGS = {"gate": {"dual": dict(mode="dual", seed=0), "v1only": dict(mode="v1only", seed=0)},
