@@ -2,6 +2,7 @@
 
     python -I -m tleye.cli check sol.py --problem p03459 [--lang Python] [--runtime PyPy] [--certify] [--prior 0.1] [--json]
     python -I -m tleye.cli check sol.cpp --statement stmt.html --time-limit-ms 2000 --certify
+    python -I -m tleye.cli check sol.py --problem p03459 --explain     (adds a code summary checked against the AST; it does not change the verdict)
 
 Three-way outcome (never claims safety):
   CERTIFIED TLE  - a generated input made the program use >= the time limit in the sandbox (OUR hardware, not the judge)
@@ -118,6 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--model", choices=["auto", "lora", "b2m"], default="auto",
                    help="auto = the confirmed LoRA model if torch/transformers/peft are installed, else the CPU LightGBM B2m")
     c.add_argument("--device", default="cpu", help="LoRA only: cpu (default, verified) or mps")
+    c.add_argument("--explain", action="store_true", help="add a code summary shown beside a real AST check (slower; its own process; never changes the verdict)")
     c.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
 
@@ -137,6 +139,9 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print("give --problem, or --statement together with --time-limit-ms", file=sys.stderr); return 2
     res = check(sol, lang, runtime, html, tl, a.certify, a.prior, a.model, a.device)
+    if a.explain:
+        from tleye.models import explain
+        res["explanation"] = explain.explain(sol.read_bytes(), lang, runtime, html, tl, device=a.device)
     if a.json:
         print(json.dumps(res, indent=1, default=float))
     else:
@@ -146,6 +151,9 @@ def main(argv: list[str] | None = None) -> int:
         if res["p_tle_at_assumed_prevalence"] is not None:
             print(f"P(TLE) @ prevalence: {res['p_tle_at_assumed_prevalence']}")
         print(f"OUTCOME            : {res['outcome']}\n{res['detail']}")
+        if "explanation" in res:
+            from tleye.models import explain
+            print(explain.render_text(res["explanation"]))
     return 0
 
 

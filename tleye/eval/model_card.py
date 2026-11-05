@@ -47,6 +47,8 @@ tags: [lora, code, competitive-programming, time-limit-exceeded, classification]
 A LoRA adapter on `{meta['base_model']}` with a 1-logit classification head. Given a solution, the problem's time limit and the input-size bounds
 parsed from the statement, it outputs P(TLE). It is the verdict half of TLEye; the other half (sandbox-confirmed failing inputs) is not part of this adapter.
 
+**Measured limits on those inputs:** the model ignores the time limit (doubling it changes the logit less than rewriting `2s` as `2.0s`) and responds to N in the right direction but weakly, and not monotonically for every solution (reports/metamorphic_lora.md in the project repo).
+
 ## Prompt format (must match exactly)
 ```
 language: <C++|Java|Python|PyPy>

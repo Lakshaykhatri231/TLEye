@@ -6,6 +6,7 @@ Source code is only tokenized here, never executed. Needs the `train` extras (to
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 import math
 from pathlib import Path
@@ -14,11 +15,8 @@ from tleye.data.kaggle_pack import MAX_CHARS, constraint_text_from_html
 
 
 def available(path: str | Path = "models/lora") -> bool:
-    try:
-        import peft  # noqa: F401
-        import torch  # noqa: F401
-        import transformers  # noqa: F401
-    except ImportError:
+    """Looks for the packages WITHOUT importing them: importing torch in a process that later loads LightGBM segfaults on macOS."""
+    if not all(importlib.util.find_spec(m) for m in ("peft", "torch", "transformers")):
         return False
     return (Path(path) / "adapter_model.safetensors").exists() and (Path(path) / "meta.json").exists()
 

@@ -20,7 +20,7 @@ CACHE: dict = {}
 MODEL_CHOICE = "auto"
 
 
-def run_check(code: str, language: str, python_runtime: str, problem_id: str, statement_html: str, time_limit_s: float, certify: bool) -> tuple[str, dict]:
+def run_check(code: str, language: str, python_runtime: str, problem_id: str, statement_html: str, time_limit_s: float, certify: bool, summarize: bool = False) -> tuple[str, dict]:
     """Return (markdown summary, raw result dict). Pure function so it can be tested without a browser."""
     if not code.strip():
         return "Paste a solution first.", {}
@@ -42,6 +42,9 @@ def run_check(code: str, language: str, python_runtime: str, problem_id: str, st
         src = Path(td) / f"sol{EXT[language]}"
         src.write_text(code)
         res = check(src, language, runtime, html, tl, certify, None, model=MODEL_CHOICE, cache=CACHE)
+        if summarize:
+            from tleye.models import explain  # its own process; cannot change the verdict
+            res["explanation"] = explain.explain(src.read_bytes(), language, runtime, html, tl)
     icon = {"CERTIFIED TLE": "🔴", "SUSPECTED TLE": "🟠", "LIKELY AC": "🟢"}[res["outcome"]]
     md = [f"## {icon} {res['outcome']}", "", res["detail"], "",
           f"- **Model:** {res['model']}",
@@ -55,6 +58,9 @@ def run_check(code: str, language: str, python_runtime: str, problem_id: str, st
     elif res.get("certificate_support"):
         cs = res["certificate_support"]
         md += ["", f"*No certificate attempted: problem category `{cs['category']}` {cs['detail'] or ''}.*"]
+    if "explanation" in res:
+        from tleye.models import explain
+        md += ["", explain.render_markdown(res["explanation"])]
     md += ["", "*Never reported as safe: LIKELY AC is an estimate, SUSPECTED TLE means no input was confirmed.*"]
     return "\n".join(md), res
 
@@ -63,7 +69,7 @@ def build_ui():
     import gradio as gr
 
     ex_dir = Path("tleye/examples")
-    examples = [[p.read_text(), "C++", "CPython", pid, "", 0.0, False] for pid, p in
+    examples = [[p.read_text(), "C++", "CPython", pid, "", 0.0, False, False] for pid, p in
                 [("p02779", ex_dir / "p02779_slow.cpp"), ("p02779", ex_dir / "p02779_fast.cpp")] if p.exists()]
     with gr.Blocks(title="TLEye") as demo:
         gr.Markdown("# TLEye\nWill this solution hit **Time Limit Exceeded**? Paste code, pick a problem, optionally try to confirm with a sandboxed run.\n\n"
@@ -79,14 +85,15 @@ def build_ui():
                     tls = gr.Number(label="Time limit (s), only for a pasted statement", value=0)
                 stmt = gr.Textbox(label="...or paste an AtCoder statement (HTML)", lines=3)
                 cert = gr.Checkbox(label="Try to certify in the sandbox (needs Docker/Colima; can take up to a minute)", value=False)
+                summ = gr.Checkbox(label="Add a code summary checked against the AST (slower; does not change the verdict)", value=False)
                 btn = gr.Button("Check", variant="primary")
             with gr.Column(scale=2):
                 out = gr.Markdown()
                 raw = gr.JSON(label="Raw result", open=False)
-        btn.click(run_check, [code, lang, rt, pid, stmt, tls, cert], [out, raw])
+        btn.click(run_check, [code, lang, rt, pid, stmt, tls, cert, summ], [out, raw])
         lang.change(lambda l: gr.update(language={"C++": "cpp", "Java": "java", "Python": "python"}[l]), lang, code)
         if examples:
-            gr.Examples(examples, [code, lang, rt, pid, stmt, tls, cert], label="Examples (real AtCoder submissions on p02779)")
+            gr.Examples(examples, [code, lang, rt, pid, stmt, tls, cert, summ], label="Examples (real AtCoder submissions on p02779)")
     return demo
 
 

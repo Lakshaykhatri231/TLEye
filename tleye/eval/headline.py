@@ -98,6 +98,25 @@ def build() -> str:
               f"Fine-tuning made these more decodable than in the base model: log10 N {probe('log10_n', 8)}, sort inside a loop {probe('sort_in_loop', 8)}; it did not change loop depth ({probe('depth_ge2', 8)}), "
               f"and has-a-sort got less decodable ({probe('has_sort', 8)}), no better than a bag of tokens ({probe('has_sort', 7)}). "
               "The base model was never trained to summarize at the last token, so a gain there may only mean the information moved."]
+    ex = Path("reports/sft_test.md")
+    if ex.exists():
+        t = ex.read_text()
+        v = re.findall(r"\| (s[01]) \| (v[01]) \| \d+ \| \d+ \| ([\d.]+) \| ([\d.]+) \| ([^|]+) \|", t)
+        ver = "; ".join(f"seed {s[1]} {r} {a} vs {b} ({c.strip()})" for s, r, a, b, c in v)
+        fld = lambda f: re.findall(rf"\| {f} \| [^|]+ \| ([\d.]+) \| ([\d.]+) \|", t)  # noqa: E731
+        fa = re.findall(r"\| (neutral|donor) \| 3000 \| 0 \| [^|]+ \| ([\d.]+) \| ([\d.]+%) \|", t)
+        drop = re.findall(r"generated minus neutral: ([^(]+) \(", t)
+        lab = re.search(r"\*\*Faithfulness labels[^:]*:\*\* neutral (\S+), donor (\S+), depth_up (\S+), sort_on (\S+)\.", t)
+        L += ["", "**Can it write a summary of the code, and does that summary drive the verdict?** (reports/sft_test.md; rules fixed in advance in reports/stage5_predeclaration.md; two seeds; each compared with the classifier of the same seed on the same rows) "
+              f"Verdict AUROC, explanation model vs classifier: {ver}. By the rule: no meaningful loss, and not better than the classifier (the two seeds point in opposite directions). "
+              "Generated fields against a real AST check, seeds 0 / 1: "
+              f"loop depth balanced accuracy {fld('loop_depth')[0][0]} / {fld('loop_depth')[1][0]} (majority guess {fld('loop_depth')[0][1]}), "
+              f"loop count exact {fld('loops')[0][0]} / {fld('loops')[1][0]} (majority {fld('loops')[0][1]}), "
+              f"listed calls in a loop exact {fld('listed_calls_in_loop')[0][0]} / {fld('listed_calls_in_loop')[1][0]} (majority {fld('listed_calls_in_loop')[0][1]}). "
+              f"**But the summary is decorative by the pre-declared labels:** replacing it on 3,000 rows moves the verdict logit only "
+              + ", ".join(f"seed {i // 2} {k} {a} mean absolute, {b} flips" for i, (k, a, b) in enumerate(fa))
+              + f", and a neutral summary costs no AUROC ({', '.join(x.strip() for x in drop)}). Labels: neutral {lab.group(1)}, donor {lab.group(2)}, depth up {lab.group(3)}, sort on {lab.group(4)}. "
+              "So it is a checkable code summary, not the reason for the verdict. The trained verdict read-out before the summary may make this more likely; a design forcing the verdict through the summary was not tested on the test split."]
     sd = Path("reports/seeds_test.md")
     if sd.exists():
         t = sd.read_text()

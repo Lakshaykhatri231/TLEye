@@ -20,3 +20,4 @@ reports/*.log
 reports/kaggle_interp/hidden/
 reports/kaggle_sft_dry/
 reports/**/heads.pt
+models/explain/adapter_model.safetensors
