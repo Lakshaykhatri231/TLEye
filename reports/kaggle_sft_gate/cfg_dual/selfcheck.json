@@ -1,0 +1,10 @@
+{
+ "cfg": "dual",
+ "dry": false,
+ "steps": 1500,
+ "total_steps": 1500,
+ "reload_max_abs_v0": 0.0,
+ "gen_batched_equals_single": true,
+ "gen_v1_max_abs": 0.00537109375,
+ "forced_vs_stepwise_max_abs": 0.00390625
+}

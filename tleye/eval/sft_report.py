@@ -14,6 +14,7 @@ from tleye.eval.metrics import cluster_bootstrap
 from tleye.features.visible_window import FIELD_RE, parse_target
 
 MIN_AUROC = 0.80
+NEAR_GUESS = 0.02
 DEPTH_CAP = 4        # depths >= 4 share one class, so a handful of rare rows cannot dominate balanced accuracy
 
 
@@ -108,10 +109,15 @@ def score_cfg(name: str, run: Path, meta: pd.DataFrame, side: pd.DataFrame, maj:
           f"**Loop depth (the gate's field):** balanced accuracy {ba:.3f} vs per-language majority guess {bb:.3f}, paired difference {ba - bb:+.3f} [{dlo:+.3f}, {dhi:+.3f}]. Depths >= {DEPTH_CAP} are one class.",
           f"Plain accuracy {np.mean(ty == py):.3f}; on truncated rows ({trunc.sum()}) {np.mean(ty[trunc] == py[trunc]) if trunc.any() else float('nan'):.3f}, on untruncated rows ({(~trunc).sum()}) {np.mean(ty[~trunc] == py[~trunc]) if (~trunc).any() else float('nan'):.3f}.", "",
           "| field | exact match, generated | exact match, per-language majority guess |", "|---|---|---|"]
+    near = []
     for f in ("loops", "recursion", "sorts", "sort_in_loop", "listed_calls_in_loop", "n_var", "log10_n", "est_log10_ops"):
         t_ = np.array([t[f] for t in true]); p_ = np.array([p.get(f, "") for p in pred])
         b_ = gen.language.map(maj[f]).values.astype(str)
         L.append(f"| {f} | {np.mean(t_ == p_):.3f} | {np.mean(t_ == b_):.3f} |")
+        if np.mean(t_ == p_) - np.mean(t_ == b_) < NEAR_GUESS:
+            near.append(f)
+    L += ["", f"Little or no gain over the majority guess (under {NEAR_GUESS}): " + (", ".join(near) if near else "none") + ". "
+          "`n_var` and `log10_n` are mostly copied from the constraints line in the prompt, so high scores there say little about understanding the code."]
     errs = {}
     for f in ("log10_n", "est_log10_ops"):
         d_ = [abs(float(p[f]) - float(t[f])) for p, t in zip(pred, true) if t[f] != "unknown" and _is_num(p.get(f, ""))]
@@ -129,6 +135,8 @@ def score_cfg(name: str, run: Path, meta: pd.DataFrame, side: pd.DataFrame, maj:
         L += ["Training curve (step: verdict BCE / value cross-entropy): " + ", ".join(f"{r['step']}: {r['verdict_bce']:.3f} / {r['ce']:.3f}" for r in pts) + ".",]
     if gn:
         L.append("Mean gradient norm per loss on the LoRA weights: " + ", ".join(f"{k} {np.mean([x[k] for x in gn]):.3f}" for k in gn[0]) + ".")
+    if not sc["gen_batched_equals_single"]:
+        L += ["**Deviation from the pre-declaration:** batched and one-at-a-time generation produced different text on at least one of 8 rows. The pre-declaration lists this as a check that fails the run, but the kernel enforced only the v1 difference, so the run continued.", ""]
     L += [f"Self-checks: reload max change {sc['reload_max_abs_v0']:.4f}; batched equals single generation {sc['gen_batched_equals_single']} (v1 max change {sc['gen_v1_max_abs']:.4f}); forced vs stepwise v1 max change {sc['forced_vs_stepwise_max_abs']:.4f}; steps {sc['steps']}/{sc['total_steps']}.",
           f"Run: {rj['n_train']} training rows, {rj['minutes']} minutes, peak {rj['peak_mem_GB']} GB, script sha {rj['script_sha256'][:12]}.", ""]
     return {"best_auroc": max(aurocs.values()), "depth_diff_lo": dlo, "dry": rj["dry"]}

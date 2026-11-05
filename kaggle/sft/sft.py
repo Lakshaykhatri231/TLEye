@@ -2,8 +2,8 @@
 classifier's `\\n### verdict:`. Readout v0 at that `:` (zero-initialized head). Then a forced template with model-filled values, `\\ntle:`, readout v1. Dataset code is only tokenized."""
 import copy, glob, json, math, os, random, subprocess, sys, time
 
-DRY = False
-STAGE = "gate"                     # "gate" = 12k rows, val only; "full" = 40k rows, val then test
+DRY = True
+STAGE = "full"                     # "gate" = 12k rows, val only; "full" = 40k rows, val then test
 FULL_MODE = "dual"
 CFGS = {"gate": {"dual": dict(mode="dual", seed=0), "v1only": dict(mode="v1only", seed=0)},
         "full": {"s0": dict(mode=FULL_MODE, seed=0), "s1": dict(mode=FULL_MODE, seed=1)}}[STAGE]
@@ -211,10 +211,14 @@ NEUTRAL = ["1", "1", "no", "0", "0", "0", "unknown", "unknown", "unknown"]
 def edit(values, field):
     """Coherent single-field edits: 'depth_up' recomputes the estimate; 'sort_on' sets sort_in_loop=1 (and at least one sort)."""
     kv = dict(zip(kl.FIELDS, values))
+    if not (kv["loop_depth"].isdecimal() and kv["sorts"].isdecimal()):
+        return list(values)                                             # a malformed generated value must not end a long run; the report excludes unchanged rows
     if field == "depth_up":
         d = int(kv["loop_depth"]); kv["loop_depth"] = str(d + 1)
-        if kv["log10_n"] != "unknown":
+        try:
             kv["est_log10_ops"] = f"{max(d + 1, 1) * float(kv['log10_n']):.1f}"
+        except ValueError:                                              # 'unknown' or malformed: the estimate stays as generated
+            pass
     elif field == "sort_on":
         kv["sort_in_loop"] = "1"; kv["sorts"] = str(max(1, int(kv["sorts"])))
     return [kv[f] for f in kl.FIELDS]
@@ -268,13 +272,18 @@ with torch.no_grad():
     assert check["reload_max_abs_v0"] < 0.05, "reloaded model differs"
     del rm, h2, h3; torch.cuda.empty_cache()
     # ---- self-check 2: batched generation equals one-at-a-time generation
-    few = samp[:8]; _, h, c, a = prompt_pass(few); vb, v1b = greedy(h, c, a); solo, v1s = [], []
+    # Amendment in reports/stage5_predeclaration.md: 64 rows, and a stated limit on the share of rows whose text differs (rounding can flip a close token choice).
+    few = kl.encode(tok, texts(va.head(8 if DRY else 64)), SUF); vb, v1b, solo, v1s = [], [], [], []
+    for i_ in range(0, len(few), 16):
+        _, h, c, a = prompt_pass(few[i_:i_ + 16]); w, v = greedy(h, c, a); vb += w; v1b += list(v)
     for s in few:
         _, h, c, a = prompt_pass([s]); w, v = greedy(h, c, a); solo.append(w[0]); v1s.append(v[0])
-    check["gen_batched_equals_single"] = vb == solo; check["gen_v1_max_abs"] = float(np.abs(v1b - np.array(v1s)).max())
+    check["gen_text_differs_share"] = float(np.mean([x != y for x, y in zip(vb, solo)])); check["gen_checked_rows"] = len(few)
+    check["gen_batched_equals_single"] = check["gen_text_differs_share"] == 0; check["gen_v1_max_abs"] = float(np.abs(np.array(v1b) - np.array(v1s)).max())
     assert check["gen_v1_max_abs"] < 0.2, "batched and single v1 disagree"
+    assert check["gen_text_differs_share"] <= 0.05, "batched and single text disagree on too many rows"
     # ---- self-check 3: forcing the generated analysis reproduces the stepwise v1
-    _, h, c, a = prompt_pass(few); c0 = copy.deepcopy(c); vb, v1b = greedy(h, c, a); vf = forced(c0, a, [comp.encode(v)[0] for v in vb])
+    _, h, c, a = prompt_pass(few[:16]); c0 = copy.deepcopy(c); vb, v1b = greedy(h, c, a); vf = forced(c0, a, [comp.encode(v)[0] for v in vb])
     check["forced_vs_stepwise_max_abs"] = float(np.abs(vf - v1b).max()); assert check["forced_vs_stepwise_max_abs"] < 0.2, "forced and stepwise v1 disagree"
 kl.atomic_json(f"{RUN}/selfcheck.json", check); log("self-checks", check)
 

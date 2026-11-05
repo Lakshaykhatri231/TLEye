@@ -1,0 +1,13 @@
+{
+ "cfg": "dual",
+ "mode": "dual",
+ "seed": 0,
+ "stage": "gate",
+ "dry": false,
+ "n_train": 12000,
+ "steps": 1500,
+ "minutes": 56.9,
+ "peak_mem_GB": 4.57,
+ "script_sha256": "925bb19220c3b8cc1b86b95e93398ecdf285c27599445c193a8e408487169a19",
+ "lib_sha256": "80e863596a34dc561367ca915d67a10fb8b4d5ebf0909287c9d9d5ec783b5897"
+}
