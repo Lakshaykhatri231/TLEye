@@ -204,13 +204,13 @@ def summary() -> str:
     n, k, m, share, fa, na = S["pilot"]
     rows.append(f"| Sandbox certificates, final engine on fresh problems | {k}/{m} = {share:.1%} of true TLE solutions confirmed | {fa}/{na} Accepted solutions wrongly certified; "
                 f"only {S['cov'][0]:.1%} of problems are supported |")
-    rows.append("| Honest negatives | ignores the time limit; responds weakly to N; its code summary does not drive the verdict | reports/metamorphic_lora.md, reports/sft_test.md |")
-    return "\n".join(["| what | result | context |", "|---|---|---|", *rows])
+    return "\n".join(["| | result | compared with |", "|---|---|---|", *rows])
 
 
 def put(s: str, start: str, end: str, block: str) -> str:
+    """Replace a marked block in the README; a block the README does not have is left out (the full set is in reports/headline.md)."""
     full = f"{start}\n{block}\n{end}"
-    return re.sub(f"{re.escape(start)}.*?{re.escape(end)}", lambda _: full, s, flags=re.S) if start in s else s + "\n" + full + "\n"
+    return re.sub(f"{re.escape(start)}.*?{re.escape(end)}", lambda _: full, s, flags=re.S) if start in s else s
 
 
 def main() -> None:

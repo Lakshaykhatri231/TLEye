@@ -55,3 +55,6 @@ flagged/
 .vscode/
 *.swp
 *~
+
+# ---------------------------------------------------------------- local assistant notes
+CLAUDE.md

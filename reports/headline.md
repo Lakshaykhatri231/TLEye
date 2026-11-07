@@ -1,11 +1,10 @@
 <!-- SUMMARY:START -->
-| what | result | context |
+| | result | compared with |
 |---|---|---|
 | Fine-tuned verdict model (Qwen2.5-Coder-0.5B + LoRA), test AUROC | **0.860** (3 seeds, 0.857 to 0.863) | LightGBM baseline B2m: 0.756 [0.735, 0.774]; every paired gain excludes 0 (+0.107 [+0.095, +0.120], +0.102 [+0.091, +0.115], +0.101 [+0.088, +0.115]) |
 | Language never seen in training, test AUROC | C++ 0.790, Java 0.846, Python 0.775 | LightGBM, same protocol: C++ 0.707, Java 0.733, Python 0.693; calibration does NOT transfer |
 | Against prompting a 7B code model (400 items) | LoRA 0.884 vs prompted 0.799 | paired gain +0.085 [+0.039, +0.128] |
 | Sandbox certificates, final engine on fresh problems | 109/179 = 60.9% of true TLE solutions confirmed | 1/196 Accepted solutions wrongly certified; only 44.7% of problems are supported |
-| Honest negatives | ignores the time limit; responds weakly to N; its code summary does not drive the verdict | reports/metamorphic_lora.md, reports/sft_test.md |
 <!-- SUMMARY:END -->
 
 <!-- HEADLINE:START -->
