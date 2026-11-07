@@ -1,0 +1,17 @@
+pandas==3.1.0
+pyarrow==26.0.0
+numpy==2.5.4
+scikit-learn==1.9.1
+lightgbm==4.7.0
+tree-sitter==0.26.0
+tree-sitter-cpp==0.23.4
+tree-sitter-java==0.23.5
+tree-sitter-python==0.25.0
+beautifulsoup4==4.15.0
+tqdm==4.70.1
+torch==2.15.0
+transformers==5.22.1
+peft==0.21.2
+accelerate==1.15.0
+safetensors==0.8.0
+huggingface_hub==2.4.0

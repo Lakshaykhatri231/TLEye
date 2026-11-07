@@ -1,4 +1,4 @@
-.PHONY: setup test lint eval data sandbox-test sandbox-images headline serve image data-manifest verify-data weights
+.PHONY: setup test lint eval data sandbox-test sandbox-images headline serve image data-manifest verify-data weights space
 
 PY=.venv/bin/python -I -m
 
@@ -68,3 +68,8 @@ image:          ## container with the CPU LightGBM model; add --build-arg WITH_L
 
 weights:        ## verdict model adapter from Hugging Face at the pinned revision, checksums verified -> models/lora/
 	$(PY) tleye.models.fetch
+
+space:          ## assemble the Hugging Face Space (needs a PRO account to host Gradio) -> data/scratch/space
+	rm -rf data/scratch/space && mkdir -p data/scratch/space/kaggle/lib data/scratch/space/models
+	cp space/* LICENSE data/scratch/space/ && cp kaggle/lib/kernel_lib.py data/scratch/space/kaggle/lib/
+	rsync -a --exclude __pycache__ tleye data/scratch/space/ && rsync -a models/b2 data/scratch/space/models/
