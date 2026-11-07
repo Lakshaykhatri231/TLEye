@@ -41,6 +41,7 @@ eval:
 	$(PY) tleye.eval.probe_report
 	$(PY) tleye.eval.sft_report
 	$(PY) tleye.eval.sft_final_report
+	$(PY) tleye.eval.risk_coverage
 	$(PY) tleye.eval.model_card
 	$(PY) tleye.eval.headline
 
