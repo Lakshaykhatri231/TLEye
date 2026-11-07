@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install -e ".[dev]"
+      - run: pip install -e ".[dev,serve]"
       - run: ruff check .
       # unit tests + the AUROC regression gate (tests/test_ci_gate.py: frozen fixture, committed model, ci/baseline_eval.json)
       - run: pytest -q
@@ -25,3 +25,25 @@ jobs:
         run: make sandbox-images
       # certified / not certified / crash / compile error / no network / missing library, run in the real Docker sandbox
       - run: pytest -q tests/test_runner.py
+
+  service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the inference image (LightGBM model; LoRA weights are not in git)
+        run: docker build -t tleye .
+      - name: Start it and wait for /health
+        run: |
+          docker run -d --name tleye -p 8000:8000 tleye
+          for i in $(seq 1 60); do curl -sf localhost:8000/health && exit 0; sleep 2; done
+          docker logs tleye; exit 1
+      - name: Smoke-test /check
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          st = "<h3>Constraints</h3><ul><li>2 \\leq N \\leq 2 \\times 10^5</li></ul>"
+          body = json.dumps({"code": open("tleye/examples/p02779_slow.cpp").read(), "language": "C++", "statement_html": st, "time_limit_ms": 2000}).encode()
+          r = json.load(urllib.request.urlopen(urllib.request.Request("http://localhost:8000/check", body, {"Content-Type": "application/json"})))
+          print(r["outcome"], r["p_tle_model"], r["elapsed_ms"], "ms")
+          assert r["outcome"] in ("SUSPECTED TLE", "LIKELY AC") and 0 <= r["p_tle_model"] <= 1
+          PY

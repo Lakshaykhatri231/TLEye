@@ -1,0 +1,176 @@
+{
+ "source": "https://codait-cos-dax.s3.us.cloud-object-storage.appdomain.cloud/dax-project-codenet/1.0.0/Project_CodeNet.tar.gz",
+ "files": {
+  "data/raw/Project_CodeNet.tar.gz": {
+   "sha256": "7e96620307f874269a62cc0225f2a5a13d2de2b3c368cf61319c87ec276620fb",
+   "bytes": 8343137473
+  },
+  "data/processed/b2_lolo_test_preds.parquet": {
+   "sha256": "af5a3fdb245130c3172af00aa3982e107ab25b9cc55ec25e6680395c60f4da68",
+   "bytes": 1449845,
+   "rows": 42990
+  },
+  "data/processed/b2_test_preds.parquet": {
+   "sha256": "c436fdf147ae628f5ed2baf5ca4726bcfe6a4040376c6b7c8de57b3ce12649c1",
+   "bytes": 1297772,
+   "rows": 42990
+  },
+  "data/processed/b2_val_preds.parquet": {
+   "sha256": "06555a9f81567a8f2e3c0ffd66a78bf78939afe99eaca4f9e919007c4b9ae915",
+   "bytes": 633051,
+   "rows": 21082
+  },
+  "data/processed/b2m_test_preds.parquet": {
+   "sha256": "ab7b79db5676ff786459ace94ab6e34d177b8b08abeeb141c528f852bbfdfb8c",
+   "bytes": 886136,
+   "rows": 42990
+  },
+  "data/processed/b2m_val_preds.parquet": {
+   "sha256": "18bbf317d0fdf76d33003d503a52109c1e5f0cbbecb2ef7f6505de4bb0d184ff",
+   "bytes": 432921,
+   "rows": 21082
+  },
+  "data/processed/baselines.json": {
+   "sha256": "46c988313dbd093127f5bb5cf7b67ae9bd45f14dda814db0167b66983413b6e7",
+   "bytes": 5474
+  },
+  "data/processed/cert_coverage.parquet": {
+   "sha256": "1ae3519afc74742dc87e297e337559eea1d23e7a5077cbe351e85ca4278b8648",
+   "bytes": 17842,
+   "rows": 1519
+  },
+  "data/processed/cert_coverage_v1.parquet": {
+   "sha256": "ef2d2924726e3f931754d85d073ae4900da365404455834f64160f59f1e1aae9",
+   "bytes": 15308,
+   "rows": 1519
+  },
+  "data/processed/cert_coverage_v2a.parquet": {
+   "sha256": "176274c822a4b0554ee8b9785b4cec254da9a737ba6e6e057d8f5c4f20ab61df",
+   "bytes": 15047,
+   "rows": 1519
+  },
+  "data/processed/cert_coverage_v2b.parquet": {
+   "sha256": "10186b2f09b40a31d22021b0530e83d8e8903bd6a374f435b93fb2bfaea52624",
+   "bytes": 15029,
+   "rows": 1519
+  },
+  "data/processed/cert_coverage_v2c.parquet": {
+   "sha256": "e4fcacce61b05f7d8e370058a9aa073edbdc6bdcadf3276ebb1b77c8d83495b8",
+   "bytes": 17848,
+   "rows": 1519
+  },
+  "data/processed/cert_pilot.jsonl": {
+   "sha256": "8bdd79ceae18ba2de4e2f60237d913805fea37038f1b59962eb68d7ee660e9db",
+   "bytes": 118928,
+   "rows": 292
+  },
+  "data/processed/cert_pilot3.jsonl": {
+   "sha256": "0a29de3627bcd6c790e4f1321682a59d3449b717605422102f193172dde749b8",
+   "bytes": 144804,
+   "rows": 314
+  },
+  "data/processed/cert_pilot4.jsonl": {
+   "sha256": "140e3b91724ec86bf5ed660a1db628eda8aea61b0ee98e6c7f7eda27076fd0cb",
+   "bytes": 175811,
+   "rows": 356
+  },
+  "data/processed/cert_pilot5.jsonl": {
+   "sha256": "7f17d9017ec6d13e34325a4f9d5a5c7a2f5b87ffe9119ed74fd2f0f7af24fe41",
+   "bytes": 187429,
+   "rows": 355
+  },
+  "data/processed/cert_pilot6.jsonl": {
+   "sha256": "e4f6a716515f98b49cac533d44454b4378dbf9edb8a15bee0a1d19231a4a6b8d",
+   "bytes": 191941,
+   "rows": 382
+  },
+  "data/processed/cert_pilot_confirm.jsonl": {
+   "sha256": "b4bb3fdebf3de48289c8f23acb98a1e8563513d72f5c7b4d3353fc43a688db3a",
+   "bytes": 125387,
+   "rows": 271
+  },
+  "data/processed/constraints_auto.parquet": {
+   "sha256": "6ea62711c7634270d3a92b34b34b36eaf4782f3e5d0bc7a8acbf0f5bba7d9d21",
+   "bytes": 33726,
+   "rows": 1519
+  },
+  "data/processed/features.parquet": {
+   "sha256": "24e79a25a714ab46a36672a2e27d66033be1eebf9844d3d7d1aabf5435db05b6",
+   "bytes": 6330388,
+   "rows": 213333
+  },
+  "data/processed/features_clean.parquet": {
+   "sha256": "687941a67332aa6e87721c894f33e12fa3e004417869b95f08df600ebab8d9f7",
+   "bytes": 16706476,
+   "rows": 209615
+  },
+  "data/processed/kaggle_b3/b3_items.parquet": {
+   "sha256": "d2a0c8215d5cdcdf559137a5c8b4e47c9d5a4df225a5094b4b5fe58feff80a1e",
+   "bytes": 460273,
+   "rows": 400
+  },
+  "data/processed/kaggle_b3/dataset-metadata.json": {
+   "sha256": "3bb081c315b9700d6f686f3b28683ec4a0967060bfb795b38471bd37ac8cadd0",
+   "bytes": 266
+  },
+  "data/processed/kaggle_pack/dataset-metadata.json": {
+   "sha256": "9a8325221eafc1c6758e578c0121569dee28a9dfaf572377ed80b3f160e65a95",
+   "bytes": 247
+  },
+  "data/processed/kaggle_pack/tleye_data.parquet": {
+   "sha256": "26d0525421361b86ca1e51c54def8cd589da86991407591c67a58aff2b88c91e",
+   "bytes": 93995618,
+   "rows": 206472
+  },
+  "data/processed/kaggle_sidecar/dataset-metadata.json": {
+   "sha256": "bcc10586eb07aa2481049c6032544bc0e341b383e51fe7b71eebd1a107eed3c6",
+   "bytes": 207
+  },
+  "data/processed/kaggle_sidecar/kernel_lib.py": {
+   "sha256": "80e863596a34dc561367ca915d67a10fb8b4d5ebf0909287c9d9d5ec783b5897",
+   "bytes": 5138
+  },
+  "data/processed/kaggle_sidecar/probe_lib.py": {
+   "sha256": "503378244dc52c8a17ebd6b38f0817c3fc11d0912446c4991e153eb1ee66f65b",
+   "bytes": 4124
+  },
+  "data/processed/kaggle_sidecar/sft_targets.parquet": {
+   "sha256": "9744db8a16d88617faf9197eaefc924cbd52dcbcca518e0bf5f080fcf87825f1",
+   "bytes": 4604310,
+   "rows": 206472
+  },
+  "data/processed/kaggle_sidecar/sft_test_subset.parquet": {
+   "sha256": "16041f2380d711329341c9c88c09d5dcfab887e3b3818eef797e6265bfd6058d",
+   "bytes": 133947,
+   "rows": 12263
+  },
+  "data/processed/label_sample_ids.csv": {
+   "sha256": "2a20ccbf2b48036889ede1877629026185b9f57e05feda8e12f7c26c459c799f",
+   "bytes": 711
+  },
+  "data/processed/selected.parquet": {
+   "sha256": "560de39fc95c200d2fdb4ed3db82434646fec10bf9bf0829c1745ca24d56aa4d",
+   "bytes": 7029662,
+   "rows": 213333
+  },
+  "data/processed/spike_agg.json": {
+   "sha256": "24e1862710dbeff932ed82c94fd3a460d9327ae833937df1a8bf2872f56abe7a",
+   "bytes": 4860
+  },
+  "data/processed/spike_cells.parquet": {
+   "sha256": "3172e68ce7b35bf72e2aff6407efe413d2eb582a94ae3d34fda13726b38969f9",
+   "bytes": 146031,
+   "rows": 44529
+  },
+  "data/processed/splits.parquet": {
+   "sha256": "c69f3ee33165eddd54dc5bd67b243de07855ef8d3b8dea87c126c04c7d722b1b",
+   "bytes": 10673,
+   "rows": 1480
+  },
+  "data/processed/sweep_val_ids.parquet": {
+   "sha256": "fbbcd7d65fc412d69126dc8925b114fe656e283fab168cab5935c1b24c4d771e",
+   "bytes": 133537,
+   "rows": 8000
+  }
+ }
+}

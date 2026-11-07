@@ -1,4 +1,4 @@
-.PHONY: setup test lint eval data sandbox-test sandbox-images headline
+.PHONY: setup test lint eval data sandbox-test sandbox-images headline serve image data-manifest verify-data
 
 PY=.venv/bin/python -I -m
 
@@ -53,3 +53,15 @@ data:
 	$(PY) tleye.data.select --cap 40
 	$(PY) tleye.data.stream_extract --tar data/raw/Project_CodeNet.tar.gz --out data/raw/extracted --selected data/processed/selected.parquet
 	$(PY) tleye.data.splits && $(PY) tleye.features.build && $(PY) tleye.data.clean && $(PY) tleye.data.kaggle_pack
+
+data-manifest:  ## record the exact data version (checksums) the results come from -> ci/data_manifest.json
+	$(PY) tleye.data.manifest
+
+verify-data:    ## check a rebuilt dataset against the committed manifest
+	$(PY) tleye.data.manifest --check
+
+serve:          ## HTTP service on http://127.0.0.1:8000 (docs at /docs)
+	.venv/bin/uvicorn tleye.serve:app --host 127.0.0.1 --port 8000
+
+image:          ## container with the CPU LightGBM model; add --build-arg WITH_LORA=1 for the LoRA model
+	docker build -t tleye .

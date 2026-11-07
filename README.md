@@ -81,6 +81,19 @@ Web demo (local only, http://127.0.0.1:7860):
 python -I -m tleye.app
 ```
 
+## API and container
+
+```bash
+make serve                      # FastAPI service on http://127.0.0.1:8000 (interactive docs at /docs)
+docker build -t tleye .         # or a container; add --build-arg WITH_LORA=1 for the LoRA model
+docker run -p 8000:8000 -v "$PWD/models/lora:/app/models/lora:ro" tleye
+curl -s localhost:8000/check -H 'Content-Type: application/json' \
+  -d '{"code": "...", "language": "C++", "statement_html": "<h3>Constraints</h3>...", "time_limit_ms": 2000}'
+```
+
+`GET /health` reports the loaded model; `POST /check` returns the same result as the CLI. Certificates are disabled in the service because
+they need a Docker daemon. Measured latency: [`reports/serving.md`](reports/serving.md).
+
 ## Reproducing
 
 ```bash
@@ -89,6 +102,7 @@ make lint
 make sandbox-test  # needs Docker (e.g. colima start --cpu 4 --memory 3 --disk 30)
 make data          # downloads CodeNet (7.8 GB) and builds the dataset
 make eval          # regenerates every report from stored predictions
+make verify-data   # checks the rebuilt data against the committed checksums (ci/data_manifest.json)
 ```
 
 Training ran on Kaggle GPUs; the exact scripts are in `kaggle/`.
