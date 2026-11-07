@@ -12,6 +12,8 @@ from sklearn.metrics import roc_auc_score
 from tleye.eval.metrics import cluster_bootstrap, metrics_with_ci
 
 START, END = "<!-- HEADLINE:START -->", "<!-- HEADLINE:END -->"
+SUM_START, SUM_END = "<!-- SUMMARY:START -->", "<!-- SUMMARY:END -->"
+S: dict = {}          # numbers for the at-a-glance table, filled while the headline is built
 
 
 def sig(x):
@@ -50,7 +52,7 @@ def build() -> str:
     L = [f"**Verdict models on the held-out test split** ({len(d):,} submissions, {d.problem_id.nunique()} problems; AtCoder only; problem-disjoint; "
          f"95% CI from a problem-clustered bootstrap; TLE prevalence {y.mean():.3f} is an artifact of per-class capping):", "",
          "| model | AUROC | AUPRC | ECE |", "|---|---|---|---|"]
-    names = [("B2 LightGBM (AST + parsed constraints)", "b2"), ("**B2m** monotone-constrained LightGBM (default verdict model)", "b2m")]
+    names = [("B2 LightGBM (AST + parsed constraints)", "b2"), ("**B2m** monotone-constrained LightGBM (CPU fallback; monotone in N and the time limit by construction)", "b2m")]
     if "lora" in d:
         names.append(("LoRA run 1: lr 2e-4, a recipe that failed to learn (reports/phase3_run1.md)", "lora"))
     if "confN" in d:
@@ -59,6 +61,7 @@ def build() -> str:
     for lab, col in names:
         r = metrics_with_ci(y, d[col].values, g, prob=True, n_boot=300)
         L.append(f"| {lab} | {fmt(r['auroc'])} | {fmt(r['auprc'])} | {r['ece'][0]:.3f} |")
+        S[col] = r["auroc"]
     if "confN" in d:
         def pair(a, b):
             def f(i):
@@ -67,14 +70,14 @@ def build() -> str:
             return f"{f(np.arange(len(d))):+.3f} [{lo:+.3f}, {hi:+.3f}]"
         L += ["", f"Paired test AUROC differences (problem-clustered): LoRA no-prefix minus B2m {pair('confN', 'b2m')}; LoRA with-prefix minus B2m {pair('confP', 'b2m')}; "
               f"with-prefix minus no-prefix {pair('confP', 'confN')} (the prefix is NOT shown to help). Both configs were fixed in advance and scored once "
-              "(reports/confirm_predeclaration.md, reports/confirm_test.md); one seed each."]
+              "(reports/confirm_predeclaration.md, reports/confirm_test.md); one seed each here, more seeds below."]
     sw = Path("reports/lr_sweep.md")
     if sw.exists():
         t = sw.read_text()
         pairs = {k: re.search(rf"\| {k} \| ([^|]+) \|", t).group(1).strip() for k in ("A - B2m", "B - B2m", "C - B2m", "B - A", "C - B")}
         L += ["", "**Learning-rate sweep, VALIDATION only** (reports/lr_sweep.md; 12,000 training rows, lr 5e-5 to 1e-4; paired AUROC difference, LoRA minus B2m): "
               f"A {pairs['A - B2m']}, B {pairs['B - B2m']}, C {pairs['C - B2m']}. The configs themselves are not separable "
-              f"(prefix B-A {pairs['B - A']}, lr C-B {pairs['C - B']}). A confirmatory test-split run is pending."]
+              f"(prefix B-A {pairs['B - A']}, lr C-B {pairs['C - B']}). These rates were then tested once in the confirmatory run above."]
     ml = Path("reports/metamorphic_lora.md")
     if ml.exists():
         t = ml.read_text()
@@ -126,13 +129,16 @@ def build() -> str:
         L += ["", "**Seed robustness of the confirmed LoRA recipe** (reports/seeds_test.md; seeds 0, 1, 2; rule fixed in advance in reports/seeds_predeclaration.md): test AUROC "
               + ", ".join(f"seed {k} {v}" for k, v in au) + f" (spread {spread.group(3)}, mean {spread.group(4)}); paired difference vs B2m "
               + ", ".join(f"seed {k} {v.strip()}" for k, v in dif) + ". Three seeds only: run-to-run variation is described, not given a confidence interval."]
+        S["seeds"] = (spread.group(1), spread.group(2), spread.group(4)); S["seed_diffs"] = [v.strip() for _, v in dif]
     lt = Path("reports/lolo_test.md")
     if lt.exists():
         rows = [ln for ln in lt.read_text().splitlines() if re.match(r"\| (C\+\+|Java|Python) \|", ln)]
         L += ["", "**LoRA on an UNSEEN language** (trained on 20,000 rows of the other two languages; reports/lolo_test.md; claim rule fixed in advance in reports/lolo_predeclaration.md):", "",
               "| held-out | LoRA AUROC | LightGBM AUROC (same protocol) | paired difference | LoRA ECE under shift | in-distribution LoRA AUROC |", "|---|---|---|---|---|---|"]
+        S["lolo"] = []
         for ln in rows:
             c = [x.strip() for x in ln.strip("|").split("|")]
+            S["lolo"].append((c[0], c[3].split(" [")[0], c[4].split(" [")[0]))
             L.append(f"| {c[0]} | {c[3]} | {c[4]} | {c[5]} | {c[7]} | {c[8].split(' (')[0]} (40k rows, 3 languages) |")
         L += ["", "The ranking transfers, but calibration does not (ECE far above the in-distribution value), and the in-distribution comparison mixes "
               "'unseen language' with 'half the training rows'."]
@@ -143,16 +149,13 @@ def build() -> str:
                 "lora": r"Fine-tuned LoRA 0.5B \| ([^|]+) \|", "b2m": r"B2m LightGBM \| ([^|]+) \|",
                 "d_a": r"LoRA - prompt_A \| ([^|]+) \|", "d_b": r"LoRA - prompt_B \| ([^|]+) \|", "m_a": r"B2m - prompt_A \| ([^|]+) \|"}
         v = {k: re.search(pat, t).group(1).strip() for k, pat in pats.items()}      # (regexes with backslashes stay OUT of f-strings: Python 3.10)
+        S["b3"] = v
         L += ["", "**Prompting vs fine-tuning** (reports/b3_test.md; the same 400 fixed test items, rule fixed in advance in reports/b3_predeclaration.md; one open model, "
               "Qwen2.5-Coder-7B-Instruct, direct YES/NO answer, no chain-of-thought): "
               f"prompted AUROC {v['pa']} (same information as the fine-tuned model) and {v['pb']} (plus the full statement); LoRA {v['lora']}; B2m {v['b2m']}. "
               f"Paired differences, LoRA minus prompted: {v['d_a']} and {v['d_b']}. "
               f"Note the untrained prompted model is not distinguishable from LightGBM (B2m minus prompted A: {v['m_a']})."]
-    bj = json.load(open("data/processed/baselines.json"))
-    lolo = [r for r in bj["lolo"] if r["model"].startswith("B2")]
-    L += ["", "**Unseen-language transfer** (B2, train on two languages, test on the third; plain B2 not B2m): " +
-          "; ".join(f"{r['scope'].replace('held-out ', '')} AUROC {r['auroc']}" for r in lolo), "",
-          "**Metamorphic checks** (reports/metamorphic.md; share of test rows where the property is violated, size bound x10 lowers P(TLE) / time limit x2 raises P(TLE)): "
+    L += ["", "**Metamorphic checks** (reports/metamorphic.md; share of test rows where the property is violated, size bound x10 lowers P(TLE) / time limit x2 raises P(TLE)): "
           + meta_line(), ""]
     ce = pd.read_csv("reports/constraints_eval.csv")
     n = len(ce)
@@ -176,9 +179,11 @@ def build() -> str:
         c = [any(x["rc"] in (0, 124) and x["cpu_s"] * 1000 >= lim for x in rs) for rs, lim in zip(p.runs, p.limit_ms)]
         p = p.assign(c=c); t, a = p[p.y_tle == 1], p[p.y_tle == 0]
         rows.append(f"| {name} | {p.problem_id.nunique()} | {int(t.c.sum())}/{len(t)} = {t.c.mean():.1%} | {int(a.c.sum())}/{len(a)} |")
+        S["pilot"] = (p.problem_id.nunique(), int(t.c.sum()), len(t), t.c.mean(), int(a.c.sum()), len(a))
     cov = pd.read_parquet("data/processed/cert_coverage.parquet")
     cov_all = (cov.category == "simple").mean()
     cov_test = ((cov.category == "simple") & (cov.split == "test")).sum() / (cov.split == "test").sum()
+    S["cov"] = (cov_all, cov_test)
     L += [f"**Sandbox certificates** (arm64 container, CPU time >= the problem limit; only problems the generator fully supports: {cov_all:.1%} of all AtCoder problems, {cov_test:.1%} of test problems; "
           "intervals omitted because they would ignore problem clustering; rows are as classified when each pilot ran, and the classification was tightened after pilots 3, 5 and 6 "
           "exposed missing rules, so reports/phase4_pilot.md also gives the restricted view):", "",
@@ -186,11 +191,33 @@ def build() -> str:
     return "\n".join(L)
 
 
+def summary() -> str:
+    """At-a-glance table for the top of the README, from the same sources as the headline (call after build())."""
+    lo, hi, mean = S["seeds"]
+    rows = [f"| Fine-tuned verdict model (Qwen2.5-Coder-0.5B + LoRA), test AUROC | **{mean}** (3 seeds, {lo} to {hi}) | LightGBM baseline B2m: {S['b2m'][0]:.3f} "
+            f"[{S['b2m'][1]:.3f}, {S['b2m'][2]:.3f}]; every paired gain excludes 0 ({', '.join(S['seed_diffs'])}) |"]
+    if "lolo" in S:
+        rows.append("| Language never seen in training, test AUROC | " + ", ".join(f"{a} {b}" for a, b, _ in S["lolo"]) + " | LightGBM, same protocol: "
+                    + ", ".join(f"{a} {c}" for a, _, c in S["lolo"]) + "; calibration does NOT transfer |")
+    if "b3" in S:
+        rows.append(f"| Against prompting a 7B code model (400 items) | LoRA {S['b3']['lora'].split(' [')[0]} vs prompted {S['b3']['pa'].split(' [')[0]} | paired gain {S['b3']['d_a']} |")
+    n, k, m, share, fa, na = S["pilot"]
+    rows.append(f"| Sandbox certificates, final engine on fresh problems | {k}/{m} = {share:.1%} of true TLE solutions confirmed | {fa}/{na} Accepted solutions wrongly certified; "
+                f"only {S['cov'][0]:.1%} of problems are supported |")
+    rows.append("| Honest negatives | ignores the time limit; responds weakly to N; its code summary does not drive the verdict | reports/metamorphic_lora.md, reports/sft_test.md |")
+    return "\n".join(["| what | result | context |", "|---|---|---|", *rows])
+
+
+def put(s: str, start: str, end: str, block: str) -> str:
+    full = f"{start}\n{block}\n{end}"
+    return re.sub(f"{re.escape(start)}.*?{re.escape(end)}", lambda _: full, s, flags=re.S) if start in s else s + "\n" + full + "\n"
+
+
 def main() -> None:
-    block = f"{START}\n{build()}\n{END}"
-    p = Path("README.md"); s = p.read_text()
-    p.write_text(re.sub(f"{re.escape(START)}.*?{re.escape(END)}", lambda _: block, s, flags=re.S) if START in s else s + "\n" + block + "\n")
-    Path("reports/headline.md").write_text(block + "\n"); print(block)
+    head = build(); summ = summary()
+    p = Path("README.md"); s = put(put(p.read_text(), START, END, head), SUM_START, SUM_END, summ)
+    p.write_text(s)
+    Path("reports/headline.md").write_text(f"{SUM_START}\n{summ}\n{SUM_END}\n\n{START}\n{head}\n{END}\n"); print(summ)
 
 
 if __name__ == "__main__":

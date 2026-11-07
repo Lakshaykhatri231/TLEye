@@ -1,23 +1,57 @@
-.venv/
-__pycache__/
-*.pyc
-.pytest_cache/
-.ruff_cache/
-data/raw/
-data/processed/
-*.tar.gz
+# ---------------------------------------------------------------- secrets: never commit
 .env
+.env.*
 kaggle.json
 access_token
-tleye.egg-info/
-data/scratch/
+*.pem
+*.key
+.huggingface/
+.cache/huggingface/
+
+# ---------------------------------------------------------------- data (CodeNet is ~8 GB; dataset code is UNTRUSTED)
+# Rebuild with `make data`. Only the hand-checked labels in data/labels/ are tracked.
+data/*
+!data/labels/
+*.tar.gz
+
+# ---------------------------------------------------------------- model weights (too large for git; see README "Model weights")
+*.safetensors
+*.pt
+*.pth
+*.bin
+*.ckpt
+*.gguf
+*.onnx
+
+# ---------------------------------------------------------------- pulled Kaggle outputs: keep reports, predictions and run metadata; drop weights, logs, dry runs
 reports/**/adapter/
-reports/kaggle_*/*.log
-models/lora/adapter_model.safetensors
+reports/**/hidden/
 reports/*_smoke*/
+reports/kaggle_*_dry/
 reports/kaggle_train_dry/
 reports/*.log
-reports/kaggle_interp/hidden/
-reports/kaggle_sft_dry/
-reports/**/heads.pt
-models/explain/adapter_model.safetensors
+reports/kaggle_*/*.log
+
+# ---------------------------------------------------------------- Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------- tools, demo, OS, editors
+.gradio/
+flagged/
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~

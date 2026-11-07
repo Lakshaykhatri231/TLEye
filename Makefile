@@ -17,13 +17,25 @@ sandbox-test:  ## needs Docker/Colima + images (gcc:13, eclipse-temurin:21-jdk, 
 headline:
 	$(PY) tleye.eval.headline
 
-# Reproduce every reported result table from the processed data (needs `make data` outputs and, for the LoRA row, reports/kaggle_train/).
+# Regenerate every report and the README tables. Needs `make data` outputs (data/processed/) and the committed Kaggle outputs in reports/kaggle_*.
+# No GPU: the Kaggle runs are NOT repeated here; their stored predictions are re-scored.
 eval:
 	$(PY) tleye.models.baselines
 	$(PY) tleye.eval.metamorphic
 	$(PY) tleye.certify.coverage
 	$(PY) tleye.certify.pilot_report
+	$(PY) tleye.certify.flagged_report
 	$(PY) tleye.constraints.eval_parser
+	$(PY) tleye.eval.sweep_report
+	$(PY) tleye.eval.confirm_report
+	$(PY) tleye.eval.seeds_report
+	$(PY) tleye.eval.lolo_report
+	$(PY) tleye.eval.b3_report
+	$(PY) tleye.eval.metamorphic_lora
+	$(PY) tleye.eval.probe_report
+	$(PY) tleye.eval.sft_report
+	$(PY) tleye.eval.sft_final_report
+	$(PY) tleye.eval.model_card
 	$(PY) tleye.eval.headline
 
 # Data pipeline (downloads the 7.8 GB CodeNet archive once; see README). Raw data is UNTRUSTED text and is never executed on the host.

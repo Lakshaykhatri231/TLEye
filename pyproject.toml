@@ -2,6 +2,7 @@
 name = "tleye"
 version = "0.1.0"
 description = "TLE verifier for competitive-programming solutions with sandbox-confirmed certificates"
+license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
 dependencies = [
   "pandas",
