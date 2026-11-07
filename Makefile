@@ -1,4 +1,4 @@
-.PHONY: setup test lint eval data sandbox-test headline
+.PHONY: setup test lint eval data sandbox-test sandbox-images headline
 
 PY=.venv/bin/python -I -m
 
@@ -11,7 +11,13 @@ test:
 lint:
 	.venv/bin/ruff check .
 
-sandbox-test:  ## needs Docker/Colima + images (gcc:13, eclipse-temurin:21-jdk, python:3.11-slim, pypy:3.10-slim)
+sandbox-images:  ## the images the certificate runner uses (tleye/certify/runner.py: IMAGES)
+	docker build -t tleye-python:3.11 sandbox/python
+	docker pull gcc:13
+	docker pull eclipse-temurin:21-jdk
+	docker pull pypy:3.10-slim
+
+sandbox-test:  ## needs Docker/Colima and `make sandbox-images`
 	.venv/bin/python -m pytest -q tests/test_runner.py
 
 headline:
