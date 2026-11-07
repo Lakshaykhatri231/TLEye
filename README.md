@@ -1,7 +1,8 @@
 # TLEye
 
-Predicts whether a competitive-programming solution (C++, Java or Python) will hit **Time Limit Exceeded**, from the code, the
-problem constraints and the time limit, and tries to **confirm** a flagged solution by generating an input and running it in a sandbox.
+**Will this competitive-programming solution hit Time Limit Exceeded?** TLEye reads a C++, Java or Python solution together with the
+problem's constraints, predicts the chance of a TLE with a fine-tuned code model, and then tries to **prove** it by generating a worst-case
+input and running the program in a locked-down sandbox.
 
 ```
 $ python -I -m tleye.cli check sol.cpp --problem p02779 --certify
@@ -12,13 +13,49 @@ OUTCOME            : CERTIFIED TLE
 input 'asc.txt' used 3.95s CPU (limit 2s) in the sandbox; measured on THIS machine's arm64 container, not the contest judge
 ```
 
-Three outcomes, and none of them claims safety:
+Three outcomes, and none of them claims a solution is safe:
 
 | outcome | meaning |
 |---|---|
 | **CERTIFIED TLE** | a generated input made the program use CPU time >= the limit in the sandbox |
 | **SUSPECTED TLE** | the model flags it, but no generated input failed (or the problem is not supported yet). **Not** reported as safe |
 | **LIKELY AC** | the model does not flag it. An estimate, not a proof |
+
+## At a glance
+
+Generated from the stored run outputs by `make eval`, like every number in this README.
+
+<!-- SUMMARY:START -->
+| what | result | context |
+|---|---|---|
+| Fine-tuned verdict model (Qwen2.5-Coder-0.5B + LoRA), test AUROC | **0.860** (3 seeds, 0.857 to 0.863) | LightGBM baseline B2m: 0.756 [0.735, 0.774]; every paired gain excludes 0 (+0.107 [+0.095, +0.120], +0.102 [+0.091, +0.115], +0.101 [+0.088, +0.115]) |
+| Language never seen in training, test AUROC | C++ 0.790, Java 0.846, Python 0.775 | LightGBM, same protocol: C++ 0.707, Java 0.733, Python 0.693; calibration does NOT transfer |
+| Against prompting a 7B code model (400 items) | LoRA 0.884 vs prompted 0.799 | paired gain +0.085 [+0.039, +0.128] |
+| Sandbox certificates, final engine on fresh problems | 109/179 = 60.9% of true TLE solutions confirmed | 1/196 Accepted solutions wrongly certified; only 44.7% of problems are supported |
+| Honest negatives | ignores the time limit; responds weakly to N; its code summary does not drive the verdict | reports/metamorphic_lora.md, reports/sft_test.md |
+<!-- SUMMARY:END -->
+
+## How it works
+
+```
+problem statement --> constraint reader --> "N<=2e5, A<=1e9" ---+
+                                                                 +--> verdict model --> P(TLE) --> flagged?
+solution code -------------------------------------------------+                                    |
+                                                                          input generator <---------+ (only with --certify)
+                                                                                 |
+                                                                     sandbox run (no network, CPU/memory caps)
+                                                                                 |
+                                                                     CERTIFIED TLE  or  SUSPECTED TLE
+```
+
+1. **Constraint reader** (`tleye/constraints`): pulls the size bounds out of the AtCoder statement, e.g. `N<=2e5`.
+2. **Verdict model** (`tleye/models`): Qwen2.5-Coder-0.5B with a LoRA adapter and a one-logit head, fine-tuned on 40,000 labelled
+   CodeNet submissions and temperature-calibrated. The prompt is the language, the time limit, the constraints line and the code (first 1,024 tokens).
+   A monotone LightGBM on tree-sitter features (`B2m`) is the CPU fallback and the main baseline.
+3. **Certificate engine** (`tleye/certify`): parses the input format, builds a battery of extreme inputs within the stated bounds, and runs
+   the program in Docker. A problem is only attempted if every sentence of its constraints is understood, so false certificates stay rare.
+4. **Optional code summary** (`--explain`): a second fine-tuned model writes loop depth, sorts, N and a rough operation count, shown beside a
+   real AST check of the same code. It is a checkable summary, not the reason for the verdict (see below).
 
 ## Claims and non-claims
 
@@ -36,6 +73,15 @@ and CodeHacker (test generation for wrong/slow solutions).
 - probabilities are calibrated to a **capped-sample prevalence** (about 40% TLE), not real-world rates; AUPRC/F1/ECE depend on it, AUROC does not (`--prior` shifts the reported probability);
 - the strongest verdict model (LoRA) was trained on 40,000 of the 142,400 training rows (three seeds for the main recipe, one seed for the unseen-language and ablation runs), and the CLI uses it automatically when torch/transformers/peft are installed (about 7-8 s per solution on an M2 CPU), otherwise it falls back to the CPU LightGBM B2m (`--model b2m`);
 
+## How it was evaluated
+
+- **Problem-disjoint splits** (1,036 / 148 / 296 AtCoder problems): no problem appears in two splits, so the model cannot memorise problems.
+- **Rules fixed before results:** every GPU run and test-split claim has a pre-declaration committed to git before launch
+  (`reports/*_predeclaration.md`); configurations are chosen on validation and scored on test once. For the probing and explanation stages, git history shows each pre-declaration committed before its run; the earlier ones predate the repository's first commit, so only their content, not their timing, can be checked from git.
+- **Uncertainty:** 95% intervals from a bootstrap that resamples whole problems; paired differences for every comparison.
+- **Traceability:** each Kaggle run records the SHA-256 of its script, checked against the repo copy; dry runs and self-checks run first.
+- **Negatives are results:** the failed first LoRA run, the ignored time limit and the decorative summary are reported, not dropped.
+
 ## Results
 
 All numbers below are generated by `make eval` from stored run outputs (`reports/headline.md`); nothing here is typed by hand.
@@ -46,14 +92,14 @@ All numbers below are generated by `make eval` from stored run outputs (`reports
 | model | AUROC | AUPRC | ECE |
 |---|---|---|---|
 | B2 LightGBM (AST + parsed constraints) | 0.759 [0.738, 0.775] | 0.675 [0.643, 0.703] | 0.008 |
-| **B2m** monotone-constrained LightGBM (default verdict model) | 0.756 [0.735, 0.774] | 0.667 [0.638, 0.697] | 0.008 |
+| **B2m** monotone-constrained LightGBM (CPU fallback; monotone in N and the time limit by construction) | 0.756 [0.735, 0.774] | 0.667 [0.638, 0.697] | 0.008 |
 | LoRA run 1: lr 2e-4, a recipe that failed to learn (reports/phase3_run1.md) | 0.663 [0.646, 0.679] | 0.544 [0.526, 0.563] | 0.025 |
 | **Qwen2.5-Coder-0.5B + LoRA, lr 1e-4, no prefix** (confirmatory run, 40k training rows) | 0.863 [0.847, 0.881] | 0.812 [0.785, 0.839] | 0.014 |
 | Qwen2.5-Coder-0.5B + LoRA, lr 1e-4, with symbolic prefix (confirmatory run) | 0.860 [0.842, 0.878] | 0.811 [0.787, 0.837] | 0.017 |
 
-Paired test AUROC differences (problem-clustered): LoRA no-prefix minus B2m +0.107 [+0.095, +0.120]; LoRA with-prefix minus B2m +0.104 [+0.092, +0.117]; with-prefix minus no-prefix -0.003 [-0.008, +0.001] (the prefix is NOT shown to help). Both configs were fixed in advance and scored once (reports/confirm_predeclaration.md, reports/confirm_test.md); one seed each.
+Paired test AUROC differences (problem-clustered): LoRA no-prefix minus B2m +0.107 [+0.095, +0.120]; LoRA with-prefix minus B2m +0.104 [+0.092, +0.117]; with-prefix minus no-prefix -0.003 [-0.008, +0.001] (the prefix is NOT shown to help). Both configs were fixed in advance and scored once (reports/confirm_predeclaration.md, reports/confirm_test.md); one seed each here, more seeds below.
 
-**Learning-rate sweep, VALIDATION only** (reports/lr_sweep.md; 12,000 training rows, lr 5e-5 to 1e-4; paired AUROC difference, LoRA minus B2m): A +0.051 [+0.030, +0.073], B +0.055 [+0.034, +0.077], C +0.060 [+0.040, +0.083]. The configs themselves are not separable (prefix B-A +0.005 [-0.001, +0.010], lr C-B +0.005 [-0.001, +0.011]). A confirmatory test-split run is pending.
+**Learning-rate sweep, VALIDATION only** (reports/lr_sweep.md; 12,000 training rows, lr 5e-5 to 1e-4; paired AUROC difference, LoRA minus B2m): A +0.051 [+0.030, +0.073], B +0.055 [+0.034, +0.077], C +0.060 [+0.040, +0.083]. The configs themselves are not separable (prefix B-A +0.005 [-0.001, +0.010], lr C-B +0.005 [-0.001, +0.011]). These rates were then tested once in the confirmatory run above.
 
 **Does the LoRA model react to the constraints?** (reports/metamorphic_lora.md; rules fixed in advance in reports/stage1_predeclaration.md; same code, one change to the prompt) N x10 at loop depth >= 2 moves the logit +0.216 [+0.138, +0.294], the right direction and above placebo noise, but small against a logit spread of about 3. LoRA (seed 0): mean change +0.142, wrong-direction share at 0 / 0.1 / 0.5 logit 41.8% / 12.0% / 1.1%. B2m (monotone by construction): mean change +0.158, wrong-direction share at 0 / 0.1 / 0.5 logit 0.0% / 0.0% / 0.0%. Doubling the time limit changes the logit by +0.001 [+0.001, +0.002] (mean absolute 0.008), less than rewriting `2s` as `2.0s` (mean absolute 0.027): the model ignores the time limit.
 
@@ -74,8 +120,6 @@ Paired test AUROC differences (problem-clustered): LoRA no-prefix minus B2m +0.1
 The ranking transfers, but calibration does not (ECE far above the in-distribution value), and the in-distribution comparison mixes 'unseen language' with 'half the training rows'.
 
 **Prompting vs fine-tuning** (reports/b3_test.md; the same 400 fixed test items, rule fixed in advance in reports/b3_predeclaration.md; one open model, Qwen2.5-Coder-7B-Instruct, direct YES/NO answer, no chain-of-thought): prompted AUROC 0.799 [0.748, 0.850] (same information as the fine-tuned model) and 0.783 [0.734, 0.834] (plus the full statement); LoRA 0.884 [0.844, 0.918]; B2m 0.775 [0.729, 0.822]. Paired differences, LoRA minus prompted: +0.085 [+0.039, +0.128] and +0.101 [+0.057, +0.139]. Note the untrained prompted model is not distinguishable from LightGBM (B2m minus prompted A: -0.024 [-0.074, +0.028]).
-
-**Unseen-language transfer** (B2, train on two languages, test on the third; plain B2 not B2m): C++ AUROC 0.707 [0.688, 0.726]; Java AUROC 0.733 [0.703, 0.761]; Python AUROC 0.693 [0.670, 0.717]
 
 **Metamorphic checks** (reports/metamorphic.md; share of test rows where the property is violated, size bound x10 lowers P(TLE) / time limit x2 raises P(TLE)): plain B2 36.53% / 71.56%, B2m 0.02% / 0.00%; paired AUROC change from the constraints (B2m - B2) -0.0030 [-0.0062, +0.0012].
 
@@ -107,28 +151,61 @@ The ranking transfers, but calibration does not (ECE far above the in-distributi
 - **Certificates (`reports/phase4_pilot.md`, `reports/cert_coverage.md`):** across six pilots (about 2,000 real submissions) the yield on true TLE solutions was 50-67%, and 9-16% of submissions crashed on generated inputs. Pilots 3, 5 and 6 each exposed a rule the generator did not model (a zero-indexed array, a format split over two blocks, parity, a plural 'trees', a restricted alphabet) and between them produced 3 false certificates on Accepted solutions. The fix was a principle, not patches: a problem is certified only if every sentence of its constraints is explained, which lowers coverage to the final figures in the table above. Restricted to the final classification, no pilot has a false certificate (0 of 880 Accepted submissions), but that restriction is post hoc. Machine speed explains only a few points of the missing yield; most uncertified TLE solutions are simply fast on our inputs.
 - **Honest limits:** 100 constraint-parser labels were written by the AI, not a human; certificate pilots cover about 30 problems each and their intervals ignore problem clustering.
 
-## Run it
+## Install and run
 
 ```bash
-make setup                      # venv + deps (LightGBM on macOS also needs: brew install libomp)
-make test && make lint          # unit tests + the AUROC regression gate (frozen fixture in tests/fixtures)
-make sandbox-test               # needs Docker (e.g. `brew install colima docker && colima start --cpu 4 --memory 3`)
-make data                       # downloads the 7.8 GB CodeNet archive once, extracts, cleans, builds splits and features
-make eval                       # regenerates every reported table
-python -I -m tleye.cli check SOLUTION --problem p03958 --certify
-python -I -m tleye.cli check SOLUTION --problem p03958 --explain   # adds the code summary beside a real AST check
+git clone <this repo> && cd TLEye
+python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"      # core + tests (macOS: brew install libomp for LightGBM)
+.venv/bin/pip install -e ".[train,demo]"                          # optional: the LoRA model, --explain and the web demo
 ```
 
-For a problem outside CodeNet: `--statement stmt.html --time-limit-ms 2000` (AtCoder HTML format).
+**Model weights.** The LightGBM models are in git (`models/b2/`). The LoRA adapters are too large for git:
+`models/lora/adapter_model.safetensors` (verdict) and `models/explain/adapter_model.safetensors` (code summary). The verdict adapter and its
+model card are on Hugging Face (`LakshayKhatri231/tleye-lora-0.5b`, private for now). Without them the CLI falls back to `--model b2m`
+and `--explain` reports that the summary is unavailable.
+
+```bash
+python -I -m tleye.cli check SOLUTION --problem p03958                 # verdict only (any CodeNet AtCoder problem id)
+python -I -m tleye.cli check SOLUTION --problem p03958 --certify       # + sandbox certificate for flagged solutions (needs Docker)
+python -I -m tleye.cli check SOLUTION --problem p03958 --explain       # + code summary beside a real AST check
+python -I -m tleye.cli check SOLUTION --statement stmt.html --time-limit-ms 2000   # a problem outside CodeNet
+```
+
+Other options: `--model auto|lora|b2m`, `--prior 0.1` (re-express P(TLE) at a real-world TLE rate), `--json`. The LoRA model takes about
+7-8 s per solution on an M2 CPU; the summary adds about 11 s.
+
+**What `--explain` adds** (real output, the fast solution in `tleye/examples/`; `!` marks a field where the model and the AST check disagree):
+
+```
+code summary       : 1 of 9 fields disagree with the AST check
+  loop_depth: model 1 | AST 1
+  loops: model 1 | AST 1
+  ...
+  ! listed_calls_in_loop: model 0 | AST 2
+  est_log10_ops: model 5.3 | AST 5.3
+```
 
 ## Web demo
 
 ```bash
-.venv/bin/pip install gradio            # once
 python -I -m tleye.app                  # then open http://127.0.0.1:7860  (local only)
 ```
-Paste a solution, give a CodeNet AtCoder problem id (or paste a statement and a time limit), and optionally tick **Try to certify** to run the
-sandbox (needs Docker/Colima). Tick **Add a code summary** to see the model's summary beside a real AST check, field by field. One model is loaded per process (`--model auto|lora|b2m`). Two real labelled examples on p02779 are built in.
+
+Paste a solution, give a CodeNet AtCoder problem id (or paste a statement and a time limit). Tick **Try to certify** to run the sandbox
+(needs Docker/Colima) and **Add a code summary** to see the summary beside the AST check, field by field. Two real labelled examples on
+p02779 are built in. One model is loaded per process (`--model auto|lora|b2m`).
+
+## Reproduce
+
+```bash
+make test && make lint     # unit tests + an AUROC regression gate on a frozen fixture (also run by CI, .github/workflows/ci.yml)
+make sandbox-test          # needs Docker, e.g. `brew install colima docker && colima start --cpu 4 --memory 3 --disk 30`
+make data                  # downloads the 7.8 GB CodeNet archive once, extracts AtCoder, cleans, builds splits and features
+make eval                  # regenerates every report in reports/ and the tables in this README
+```
+
+`make eval` re-scores the stored predictions of the Kaggle GPU runs (`reports/kaggle_*`); it does not retrain the LoRA models. The exact
+training scripts are in `kaggle/` and ran on Kaggle's free 2x T4 GPUs.
 
 ## Safety
 
@@ -136,12 +213,25 @@ Dataset code is untrusted. It is only ever read as text on the host. The only pl
 read-only root filesystem, dropped capabilities, CPU/memory/pids caps, non-root user, and a wall-clock kill that removes the container by name.
 The runner never turns a mount failure or a crash into a verdict.
 
-**Known limitation:** on macOS, a Python process that has already run LightGBM predictions (B2/B2m) segfaults when it then loads the LoRA model (OpenMP runtime clash, reproduced). The CLI uses one model per process, so it is unaffected; if you script against the library, load only one of the two in a process.
+**Known limitation:** on macOS, LightGBM and PyTorch in one Python process can segfault (OpenMP runtime clash, reproduced). The CLI and
+the demo load one model per process and run the summary model in its own process; if you script against the library, keep them apart.
 
-## Layout
+## Repository layout
 
-`tleye/data` extraction, cleaning, problem-disjoint splits | `tleye/constraints` statement parser + its evaluation | `tleye/features` tree-sitter features |
-`tleye/models` baselines, persisted B2/B2m | `tleye/certify` input spec, generator, sandbox, runner, pilots | `tleye/eval` metrics, metamorphic checks, comparisons |
-`kaggle/` the exact scripts that ran on Kaggle GPUs (hashes recorded in their run outputs) | `reports/` generated reports | `models/b2` persisted models | `ci/` regression baseline.
+| path | contents |
+|---|---|
+| `tleye/data` | streaming CodeNet extraction, labels, cleaning, problem-disjoint splits, Kaggle data pack |
+| `tleye/constraints` | statement parser and its evaluation |
+| `tleye/features` | tree-sitter features (same set for all three languages), the summary target on the model's visible window |
+| `tleye/models` | LightGBM baselines, LoRA verdict inference, code-summary inference |
+| `tleye/certify` | input-format parser, bounds, generators, sandbox, runner, coverage, pilots |
+| `tleye/eval` | metrics, bootstrap, every report script, README headline, model card |
+| `kaggle/` | the exact scripts that ran on Kaggle GPUs (hashes recorded in their outputs) |
+| `reports/` | generated reports, pre-declarations, stored predictions from each run |
+| `models/` | LightGBM models, adapter configs and metadata (weights not in git) |
+| `tests/`, `ci/` | unit tests, the frozen CI fixture and regression baseline |
 
-Data: derived from IBM Project CodeNet (AtCoder subset). Raw data and processed parquet files are not committed.
+## Data and license
+
+Data: IBM Project CodeNet, AtCoder subset; see CodeNet's own terms. Raw data and processed files are not committed (`make data` rebuilds them).
+Base model: Qwen2.5-Coder-0.5B (Apache-2.0). Code: Apache-2.0 (`LICENSE`); the LoRA adapters are released under Apache-2.0 too.

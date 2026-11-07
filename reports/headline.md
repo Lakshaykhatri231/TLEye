@@ -1,17 +1,27 @@
+<!-- SUMMARY:START -->
+| what | result | context |
+|---|---|---|
+| Fine-tuned verdict model (Qwen2.5-Coder-0.5B + LoRA), test AUROC | **0.860** (3 seeds, 0.857 to 0.863) | LightGBM baseline B2m: 0.756 [0.735, 0.774]; every paired gain excludes 0 (+0.107 [+0.095, +0.120], +0.102 [+0.091, +0.115], +0.101 [+0.088, +0.115]) |
+| Language never seen in training, test AUROC | C++ 0.790, Java 0.846, Python 0.775 | LightGBM, same protocol: C++ 0.707, Java 0.733, Python 0.693; calibration does NOT transfer |
+| Against prompting a 7B code model (400 items) | LoRA 0.884 vs prompted 0.799 | paired gain +0.085 [+0.039, +0.128] |
+| Sandbox certificates, final engine on fresh problems | 109/179 = 60.9% of true TLE solutions confirmed | 1/196 Accepted solutions wrongly certified; only 44.7% of problems are supported |
+| Honest negatives | ignores the time limit; responds weakly to N; its code summary does not drive the verdict | reports/metamorphic_lora.md, reports/sft_test.md |
+<!-- SUMMARY:END -->
+
 <!-- HEADLINE:START -->
 **Verdict models on the held-out test split** (42,990 submissions, 296 problems; AtCoder only; problem-disjoint; 95% CI from a problem-clustered bootstrap; TLE prevalence 0.401 is an artifact of per-class capping):
 
 | model | AUROC | AUPRC | ECE |
 |---|---|---|---|
 | B2 LightGBM (AST + parsed constraints) | 0.759 [0.738, 0.775] | 0.675 [0.643, 0.703] | 0.008 |
-| **B2m** monotone-constrained LightGBM (default verdict model) | 0.756 [0.735, 0.774] | 0.667 [0.638, 0.697] | 0.008 |
+| **B2m** monotone-constrained LightGBM (CPU fallback; monotone in N and the time limit by construction) | 0.756 [0.735, 0.774] | 0.667 [0.638, 0.697] | 0.008 |
 | LoRA run 1: lr 2e-4, a recipe that failed to learn (reports/phase3_run1.md) | 0.663 [0.646, 0.679] | 0.544 [0.526, 0.563] | 0.025 |
 | **Qwen2.5-Coder-0.5B + LoRA, lr 1e-4, no prefix** (confirmatory run, 40k training rows) | 0.863 [0.847, 0.881] | 0.812 [0.785, 0.839] | 0.014 |
 | Qwen2.5-Coder-0.5B + LoRA, lr 1e-4, with symbolic prefix (confirmatory run) | 0.860 [0.842, 0.878] | 0.811 [0.787, 0.837] | 0.017 |
 
-Paired test AUROC differences (problem-clustered): LoRA no-prefix minus B2m +0.107 [+0.095, +0.120]; LoRA with-prefix minus B2m +0.104 [+0.092, +0.117]; with-prefix minus no-prefix -0.003 [-0.008, +0.001] (the prefix is NOT shown to help). Both configs were fixed in advance and scored once (reports/confirm_predeclaration.md, reports/confirm_test.md); one seed each.
+Paired test AUROC differences (problem-clustered): LoRA no-prefix minus B2m +0.107 [+0.095, +0.120]; LoRA with-prefix minus B2m +0.104 [+0.092, +0.117]; with-prefix minus no-prefix -0.003 [-0.008, +0.001] (the prefix is NOT shown to help). Both configs were fixed in advance and scored once (reports/confirm_predeclaration.md, reports/confirm_test.md); one seed each here, more seeds below.
 
-**Learning-rate sweep, VALIDATION only** (reports/lr_sweep.md; 12,000 training rows, lr 5e-5 to 1e-4; paired AUROC difference, LoRA minus B2m): A +0.051 [+0.030, +0.073], B +0.055 [+0.034, +0.077], C +0.060 [+0.040, +0.083]. The configs themselves are not separable (prefix B-A +0.005 [-0.001, +0.010], lr C-B +0.005 [-0.001, +0.011]). A confirmatory test-split run is pending.
+**Learning-rate sweep, VALIDATION only** (reports/lr_sweep.md; 12,000 training rows, lr 5e-5 to 1e-4; paired AUROC difference, LoRA minus B2m): A +0.051 [+0.030, +0.073], B +0.055 [+0.034, +0.077], C +0.060 [+0.040, +0.083]. The configs themselves are not separable (prefix B-A +0.005 [-0.001, +0.010], lr C-B +0.005 [-0.001, +0.011]). These rates were then tested once in the confirmatory run above.
 
 **Does the LoRA model react to the constraints?** (reports/metamorphic_lora.md; rules fixed in advance in reports/stage1_predeclaration.md; same code, one change to the prompt) N x10 at loop depth >= 2 moves the logit +0.216 [+0.138, +0.294], the right direction and above placebo noise, but small against a logit spread of about 3. LoRA (seed 0): mean change +0.142, wrong-direction share at 0 / 0.1 / 0.5 logit 41.8% / 12.0% / 1.1%. B2m (monotone by construction): mean change +0.158, wrong-direction share at 0 / 0.1 / 0.5 logit 0.0% / 0.0% / 0.0%. Doubling the time limit changes the logit by +0.001 [+0.001, +0.002] (mean absolute 0.008), less than rewriting `2s` as `2.0s` (mean absolute 0.027): the model ignores the time limit.
 
@@ -32,8 +42,6 @@ Paired test AUROC differences (problem-clustered): LoRA no-prefix minus B2m +0.1
 The ranking transfers, but calibration does not (ECE far above the in-distribution value), and the in-distribution comparison mixes 'unseen language' with 'half the training rows'.
 
 **Prompting vs fine-tuning** (reports/b3_test.md; the same 400 fixed test items, rule fixed in advance in reports/b3_predeclaration.md; one open model, Qwen2.5-Coder-7B-Instruct, direct YES/NO answer, no chain-of-thought): prompted AUROC 0.799 [0.748, 0.850] (same information as the fine-tuned model) and 0.783 [0.734, 0.834] (plus the full statement); LoRA 0.884 [0.844, 0.918]; B2m 0.775 [0.729, 0.822]. Paired differences, LoRA minus prompted: +0.085 [+0.039, +0.128] and +0.101 [+0.057, +0.139]. Note the untrained prompted model is not distinguishable from LightGBM (B2m minus prompted A: -0.024 [-0.074, +0.028]).
-
-**Unseen-language transfer** (B2, train on two languages, test on the third; plain B2 not B2m): C++ AUROC 0.707 [0.688, 0.726]; Java AUROC 0.733 [0.703, 0.761]; Python AUROC 0.693 [0.670, 0.717]
 
 **Metamorphic checks** (reports/metamorphic.md; share of test rows where the property is violated, size bound x10 lowers P(TLE) / time limit x2 raises P(TLE)): plain B2 36.53% / 71.56%, B2m 0.02% / 0.00%; paired AUROC change from the constraints (B2m - B2) -0.0030 [-0.0062, +0.0012].
 
