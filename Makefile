@@ -1,4 +1,4 @@
-.PHONY: setup test lint eval data sandbox-test sandbox-images headline serve image data-manifest verify-data
+.PHONY: setup test lint eval data sandbox-test sandbox-images headline serve image data-manifest verify-data weights
 
 PY=.venv/bin/python -I -m
 
@@ -65,3 +65,6 @@ serve:          ## HTTP service on http://127.0.0.1:8000 (docs at /docs)
 
 image:          ## container with the CPU LightGBM model; add --build-arg WITH_LORA=1 for the LoRA model
 	docker build -t tleye .
+
+weights:        ## verdict model adapter from Hugging Face at the pinned revision, checksums verified -> models/lora/
+	$(PY) tleye.models.fetch

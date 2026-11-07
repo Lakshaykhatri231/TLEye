@@ -56,4 +56,4 @@ Compared with zero-shot prompting of Qwen2.5-Coder-7B-Instruct (direct YES/NO, n
 - Three training seeds for the main recipe (test AUROC 0.857 to 0.863); the unseen-language runs used one seed each; 296 test problems.
 - The adapter was trained on public competitive-programming submissions; do not execute dataset code outside a sandbox.
 
-Training/evaluation code, the sandbox certificate engine and all reports are in the TLEye code repository: to be published.
+Training/evaluation code, the sandbox certificate engine and all reports: https://github.com/Lakshaykhatri231/TLEye

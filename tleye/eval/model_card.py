@@ -80,6 +80,6 @@ Per-language AUROC: {', '.join(f"{l} {a}" for l, _, a, _ in lang_rows) if lang_r
 - {seed_line}; 296 test problems.
 - The adapter was trained on public competitive-programming submissions; do not execute dataset code outside a sandbox.
 
-Training/evaluation code, the sandbox certificate engine and all reports are in the TLEye code repository: to be published.
+Training/evaluation code, the sandbox certificate engine and all reports: https://github.com/Lakshaykhatri231/TLEye
 """
 Path("models/lora/README.md").write_text(card); print(card[:1800])

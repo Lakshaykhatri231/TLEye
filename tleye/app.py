@@ -8,6 +8,8 @@ The solution is only parsed as text unless 'Try to certify' is ticked, in which 
 from __future__ import annotations
 
 import argparse
+import os
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -18,12 +20,26 @@ from tleye.cli import R, check
 EXT = {"C++": ".cpp", "Java": ".java", "Python": ".py"}
 CACHE: dict = {}
 MODEL_CHOICE = "auto"
+HOSTED = bool(os.environ.get("TLEYE_HOSTED"))          # e.g. a Hugging Face Space: no Docker, no CodeNet files
+EXAMPLES = Path(__file__).parent / "examples"
+# Constraints of the example problem (p02779), written out by hand, so hosted demos do not need CodeNet's statement files.
+EXAMPLE_STATEMENT = "<h3>Constraints</h3><ul><li>2 \\leq N \\leq 200000</li><li>1 \\leq A_i \\leq 10^9</li><li>All values in input are integers.</li></ul>"
+
+
+def can_certify() -> bool:
+    return not HOSTED and shutil.which("docker") is not None
+
+
+def has_codenet() -> bool:
+    return (R / "metadata" / "problem_list.csv").exists()
 
 
 def run_check(code: str, language: str, python_runtime: str, problem_id: str, statement_html: str, time_limit_s: float, certify: bool, summarize: bool = False) -> tuple[str, dict]:
     """Return (markdown summary, raw result dict). Pure function so it can be tested without a browser."""
     if not code.strip():
         return "Paste a solution first.", {}
+    if certify and not can_certify():
+        return "Certificates need a local Docker sandbox and are not available here; untick 'Try to certify'.", {}
     problem_id = (problem_id or "").strip()
     if statement_html.strip():
         html, tl = statement_html, float(time_limit_s) * 1000.0
@@ -68,12 +84,14 @@ def run_check(code: str, language: str, python_runtime: str, problem_id: str, st
 def build_ui():
     import gradio as gr
 
-    ex_dir = Path("tleye/examples")
-    examples = [[p.read_text(), "C++", "CPython", pid, "", 0.0, False, False] for pid, p in
-                [("p02779", ex_dir / "p02779_slow.cpp"), ("p02779", ex_dir / "p02779_fast.cpp")] if p.exists()]
+    from tleye.models import explain
+    codenet, certify_ok, explain_ok = has_codenet(), can_certify(), explain.available()
+    examples = [[p.read_text(), "C++", "CPython", "", EXAMPLE_STATEMENT, 2.0, False, False] for p in
+                (EXAMPLES / "p02779_slow.cpp", EXAMPLES / "p02779_fast.cpp") if p.exists()]
     with gr.Blocks(title="TLEye") as demo:
-        gr.Markdown("# TLEye\nWill this solution hit **Time Limit Exceeded**? Paste code, pick a problem, optionally try to confirm with a sandboxed run.\n\n"
-                    "*Runs locally. Code only executes inside the Docker sandbox, and only if you tick the box.*")
+        gr.Markdown("# TLEye\nWill this competitive-programming solution hit **Time Limit Exceeded**? Paste the code and the problem's constraints.\n\n"
+                    + ("*Code is only read as text here, never run.*" if not certify_ok else "*Code only executes inside the Docker sandbox, and only if you tick the box.*")
+                    + " Source: [GitHub](https://github.com/Lakshaykhatri231/TLEye) · model: [Hugging Face](https://huggingface.co/LakshayKhatri231/tleye-lora-0.5b)")
         with gr.Row():
             with gr.Column(scale=3):
                 code = gr.Code(label="Solution", language="cpp", lines=22)
@@ -81,11 +99,11 @@ def build_ui():
                     lang = gr.Dropdown(["C++", "Java", "Python"], value="C++", label="Language")
                     rt = gr.Dropdown(["CPython", "PyPy"], value="CPython", label="Python runtime (Python only)")
                 with gr.Row():
-                    pid = gr.Textbox(label="CodeNet AtCoder problem id", placeholder="p02779")
-                    tls = gr.Number(label="Time limit (s), only for a pasted statement", value=0)
-                stmt = gr.Textbox(label="...or paste an AtCoder statement (HTML)", lines=3)
-                cert = gr.Checkbox(label="Try to certify in the sandbox (needs Docker/Colima; can take up to a minute)", value=False)
-                summ = gr.Checkbox(label="Add a code summary checked against the AST (slower; does not change the verdict)", value=False)
+                    pid = gr.Textbox(label="CodeNet AtCoder problem id", placeholder="p02779", visible=codenet)
+                    tls = gr.Number(label="Time limit (s)", value=0)
+                stmt = gr.Textbox(label="Problem statement or just its constraints (AtCoder HTML)" if not codenet else "...or paste an AtCoder statement (HTML)", lines=3)
+                cert = gr.Checkbox(label="Try to certify in the sandbox (needs Docker; can take up to a minute)", value=False, visible=certify_ok)
+                summ = gr.Checkbox(label="Add a code summary checked against the AST (slower; does not change the verdict)", value=False, visible=explain_ok)
                 btn = gr.Button("Check", variant="primary")
             with gr.Column(scale=2):
                 out = gr.Markdown()
@@ -93,7 +111,7 @@ def build_ui():
         btn.click(run_check, [code, lang, rt, pid, stmt, tls, cert, summ], [out, raw])
         lang.change(lambda l: gr.update(language={"C++": "cpp", "Java": "java", "Python": "python"}[l]), lang, code)
         if examples:
-            gr.Examples(examples, [code, lang, rt, pid, stmt, tls, cert, summ], label="Examples (real AtCoder submissions on p02779)")
+            gr.Examples(examples, [code, lang, rt, pid, stmt, tls, cert, summ], label="Examples: real AtCoder submissions (p02779: are all N numbers distinct?)")
     return demo
 
 

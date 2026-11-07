@@ -61,8 +61,9 @@ python3 -m venv .venv
 .venv/bin/pip install -e ".[train,demo]"     # optional: LoRA model, code summary, web demo
 ```
 
-The LightGBM models are included. The LoRA adapters are not in git: place them at `models/lora/adapter_model.safetensors` and
-`models/explain/adapter_model.safetensors`. Without them the CLI uses the LightGBM model.
+The LightGBM models are included. The verdict model's LoRA adapter is on Hugging Face
+([LakshayKhatri231/tleye-lora-0.5b](https://huggingface.co/LakshayKhatri231/tleye-lora-0.5b)); `make weights` downloads it at the pinned
+revision and verifies its checksums. Without it the CLI uses the LightGBM model. The code-summary adapter (`--explain`) is not published.
 
 ## Usage
 
