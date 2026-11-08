@@ -111,7 +111,7 @@ Operations of the live demo:
   a version that fails its health check is rolled back (`deploy/updater.sh`). No cloud credentials are stored on GitHub.
 - **Monitoring:** a scheduled workflow runs a real prediction against the demo every 30 minutes and fails (GitHub emails the owner) if it
   is down or wrong (`.github/workflows/uptime.yml`); `/health` reports the deployed commit, uptime and request counts; CloudWatch alarms
-  reboot or recover the server if AWS's status checks fail; container logs rotate.
+  reboot or recover the server if AWS's status checks fail; the app's and the deployer's logs go to CloudWatch Logs (`/tleye/demo`, kept 14 days).
 
 ## Reproducing
 
