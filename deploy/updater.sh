@@ -8,7 +8,8 @@ log() {
   echo "$*"
   local ev; ev=$(jq -cn --arg m "$*" --argjson t "$(date +%s%3N)" '[{timestamp: $t, message: $m}]')
   put() { aws logs put-log-events --log-group-name /tleye/demo --log-stream-name updater --log-events "$ev" >/dev/null 2>&1; }
-  put || { aws logs create-log-stream --log-group-name /tleye/demo --log-stream-name updater >/dev/null 2>&1 && put; } || true
+  put || { aws logs create-log-group --log-group-name /tleye/demo >/dev/null 2>&1   # first message on a fresh server: group may not exist yet
+           aws logs create-log-stream --log-group-name /tleye/demo --log-stream-name updater >/dev/null 2>&1; put; } || true
 }
 export AWS_DEFAULT_REGION=$(TOKEN=$(curl -sf -m 2 -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 60"); \
   curl -sf -m 2 -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region || echo ap-southeast-2)
