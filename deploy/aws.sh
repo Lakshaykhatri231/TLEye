@@ -28,11 +28,14 @@ up)
   AMI=$(ec2 describe-images --owners amazon --filters "Name=name,Values=al2023-ami-2023.*-kernel-6.*-$ARCH" "Name=state,Values=available" \
           --query 'sort_by(Images,&CreationDate)[-1].ImageId' --output text)
   UD=$(mktemp); sed -e "s/__COMMIT__/$COMMIT/" -e "s/__DTYPE__/$DTYPE/" "$(dirname "$0")/user_data.sh" > "$UD"
-  ID=$(ec2 run-instances --image-id "$AMI" --instance-type "$TYPE" --security-group-ids "$SG" --user-data "file://$UD" \
+  PROFILE=${PROFILE-tleye-ec2-logs}      # IAM role for CloudWatch Logs; launched without it if it does not exist or may not be passed
+  launch() { ec2 run-instances --image-id "$AMI" --instance-type "$TYPE" --security-group-ids "$SG" --user-data "file://$UD" "$@" \
         --block-device-mappings "DeviceName=/dev/xvda,Ebs={VolumeSize=$DISK_GB,VolumeType=gp3,DeleteOnTermination=true}" \
         --metadata-options HttpTokens=required \
         --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME},{Key=commit,Value=$COMMIT}]" \
-        ${DRYRUN:+--dry-run} --query 'Instances[0].InstanceId' --output text)
+        ${DRYRUN:+--dry-run} --query 'Instances[0].InstanceId' --output text; }
+  if [ -n "$PROFILE" ] && ID=$(launch --iam-instance-profile "Name=$PROFILE" 2>/dev/null); then echo "logs: CloudWatch group /tleye/demo"
+  else ID=$(launch); echo "logs: local only (no usable $PROFILE role)"; fi
   rm -f "$UD"
   ec2 wait instance-running --instance-ids "$ID"
   IP=$(ec2 describe-instances --instance-ids "$ID" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
