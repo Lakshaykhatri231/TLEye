@@ -9,6 +9,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import math
+import os
 from pathlib import Path
 
 from tleye.data.kaggle_pack import MAX_CHARS, constraint_text_from_html
@@ -41,9 +42,13 @@ class LoraVerdict:
         if self.tok.pad_token is None:
             self.tok.pad_token = self.tok.eos_token
         self.suffix = self.tok(self.meta["suffix"], add_special_tokens=False)["input_ids"]
-        base = AutoModelForSequenceClassification.from_pretrained(self.meta["base_model"], num_labels=1, dtype=torch.float32)
+        # TLEYE_DTYPE=bfloat16 halves memory (about 1 GB of weights) for small servers; float32 is the verified default (reports/serving.md)
+        self.dtype = getattr(torch, os.environ.get("TLEYE_DTYPE", "float32"))
+        base = AutoModelForSequenceClassification.from_pretrained(self.meta["base_model"], num_labels=1, dtype=self.dtype)   # load straight in that precision
         base.config.pad_token_id = self.tok.pad_token_id
         self.model = PeftModel.from_pretrained(base, str(self.path)).eval()
+        if self.dtype != torch.float32:                    # fold the adapter into the weights, so every layer runs in one precision
+            self.model = self.model.merge_and_unload().to(self.dtype)
         self.device = device or ("mps" if torch.backends.mps.is_available() else "cpu")
         self.model.to(self.device)
         self.torch = torch

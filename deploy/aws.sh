@@ -3,7 +3,8 @@
 # up: creates a security group (port 80 only, no SSH) and one server that builds and runs the pushed commit. down: removes both.
 set -euo pipefail
 NAME=tleye-demo
-TYPE=${TYPE:-t4g.medium}               # ARM, 2 vCPU, 4 GB: the LoRA service needs about 2.4 GB
+TYPE=${TYPE:-t4g.small}                # ARM, 2 vCPU, 2 GB, free-plan eligible; the model runs in 16-bit with 4 GB swap
+DTYPE=${DTYPE:-float16}                # same verdicts as float32 on 64 test rows (max prob change 0.003); float32 needs ~2.4 GB
 DISK_GB=${DISK_GB:-20}
 REGION=${REGION:-$(aws configure get region)}   # new-experience AWS projects only allow their home region (e.g. REGION=ap-southeast-2)
 ec2() { aws ec2 --region "$REGION" "$@"; }
@@ -26,7 +27,7 @@ up)
   ARCH=$([[ "$TYPE" == *g.* ]] && echo arm64 || echo x86_64)
   AMI=$(ec2 describe-images --owners amazon --filters "Name=name,Values=al2023-ami-2023.*-kernel-6.*-$ARCH" "Name=state,Values=available" \
           --query 'sort_by(Images,&CreationDate)[-1].ImageId' --output text)
-  UD=$(mktemp); sed "s/__COMMIT__/$COMMIT/" "$(dirname "$0")/user_data.sh" > "$UD"
+  UD=$(mktemp); sed -e "s/__COMMIT__/$COMMIT/" -e "s/__DTYPE__/$DTYPE/" "$(dirname "$0")/user_data.sh" > "$UD"
   ID=$(ec2 run-instances --image-id "$AMI" --instance-type "$TYPE" --security-group-ids "$SG" --user-data "file://$UD" \
         --block-device-mappings "DeviceName=/dev/xvda,Ebs={VolumeSize=$DISK_GB,VolumeType=gp3,DeleteOnTermination=true}" \
         --metadata-options HttpTokens=required \
