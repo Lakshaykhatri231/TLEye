@@ -28,6 +28,9 @@ ALLOW_CERTIFY = os.environ.get("TLEYE_ALLOW_CERTIFY") == "1"
 MAX_CODE_BYTES = 200_000
 CACHE: dict = {}
 LOCK = threading.Lock()          # the models are not shared across threads; one request at a time per process
+STARTED = time.time()
+STATS = {"checks": 0, "failed": 0, "last_ms": None}
+COMMIT = os.environ.get("TLEYE_COMMIT", "unknown")
 SUFFIX = {v: k for k, v in EXT.items() if k in (".cpp", ".java", ".py")}
 
 
@@ -76,6 +79,7 @@ def run(req: CheckRequest) -> dict:
             from tleye.models import explain
             res["explanation"] = explain.explain(src.read_bytes(), req.language, runtime, html, tl)
     res["elapsed_ms"] = round((time.perf_counter() - t0) * 1000, 1)
+    STATS["checks"] += 1; STATS["last_ms"] = res["elapsed_ms"]
     return res
 
 
@@ -93,12 +97,19 @@ app = FastAPI(title="TLEye", description="Predicts Time Limit Exceeded for compe
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "model": next(iter(CACHE), None), "certify_enabled": ALLOW_CERTIFY}
+    return {"status": "ok", "model": next(iter(CACHE), None), "certify_enabled": ALLOW_CERTIFY, "commit": COMMIT[:7],
+            "uptime_s": round(time.time() - STARTED), **STATS}
 
 
 @app.post("/check")
 def check_endpoint(req: CheckRequest) -> dict:
-    return run(req)
+    try:
+        return run(req)
+    except HTTPException:
+        raise
+    except Exception:
+        STATS["failed"] += 1
+        raise
 
 
 if os.environ.get("TLEYE_DEMO") == "1":          # also serve the web demo at /, sharing this process's model (one copy in memory)

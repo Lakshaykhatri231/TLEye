@@ -106,6 +106,13 @@ curl -s localhost:8000/check -H 'Content-Type: application/json' \
 they need a Docker daemon. Measured latency: [`reports/serving.md`](reports/serving.md).
 `make aws-up` / `make aws-status` / `make aws-down` run the same container on one EC2 server (`deploy/aws.sh`; set `REGION` for AWS projects tied to one region).
 
+Operations of the live demo:
+- **Continuous deployment:** the server checks GitHub every 5 minutes and deploys a new `main` commit only after all three CI jobs pass;
+  a version that fails its health check is rolled back (`deploy/updater.sh`). No cloud credentials are stored on GitHub.
+- **Monitoring:** a scheduled workflow runs a real prediction against the demo every 30 minutes and fails (GitHub emails the owner) if it
+  is down or wrong (`.github/workflows/uptime.yml`); `/health` reports the deployed commit, uptime and request counts; CloudWatch alarms
+  reboot or recover the server if AWS's status checks fail; container logs rotate.
+
 ## Reproducing
 
 ```bash

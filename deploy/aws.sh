@@ -36,17 +36,26 @@ up)
   rm -f "$UD"
   ec2 wait instance-running --instance-ids "$ID"
   IP=$(ec2 describe-instances --instance-ids "$ID" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
-  echo "server $ID ($TYPE, $REGION) at http://$IP  commit ${COMMIT:0:7}"
+  # auto-repair: reboot if the OS stops responding, move to healthy hardware if AWS's host fails
+  cw() { aws cloudwatch --region "$REGION" put-metric-alarm --namespace AWS/EC2 --statistic Maximum --period 60 --threshold 0 \
+           --comparison-operator GreaterThanThreshold --dimensions "Name=InstanceId,Value=$ID" "$@"; }
+  cw --alarm-name "$NAME-reboot" --metric-name StatusCheckFailed_Instance --evaluation-periods 3 --alarm-actions "arn:aws:automate:$REGION:ec2:reboot" \
+    && cw --alarm-name "$NAME-recover" --metric-name StatusCheckFailed_System --evaluation-periods 2 --alarm-actions "arn:aws:automate:$REGION:ec2:recover" \
+    && echo "CloudWatch alarms: $NAME-reboot, $NAME-recover" || echo "warning: could not create the CloudWatch alarms"
+  echo "http://$IP" > "$(dirname "$0")/live_url"
+  echo "server $ID ($TYPE, $REGION) at http://$IP  commit ${COMMIT:0:7}  (deploy/live_url updated: commit and push it)"
   echo "the first start builds the image and downloads the models: about 10-15 minutes. Check with: deploy/aws.sh status" ;;
 status)
   ID=$(instance_id); [ -z "$ID" ] && { echo "no server"; exit 0; }
   IP=$(ec2 describe-instances --instance-ids "$ID" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
   echo "server $ID at http://$IP"
   curl -s -m 5 "http://$IP/health" && echo || echo "not answering yet (still building, or failed: see the boot log below)"
+  aws cloudwatch --region "$REGION" describe-alarms --alarm-names "$NAME-reboot" "$NAME-recover" --query 'MetricAlarms[].[AlarmName,StateValue]' --output text
   ec2 get-console-output --instance-id "$ID" --latest --output text 2>/dev/null | tail -5 || true ;;
 down)
   ID=$(instance_id)
   [ -n "$ID" ] && { ec2 terminate-instances --instance-ids $ID >/dev/null; ec2 wait instance-terminated --instance-ids $ID; echo "terminated $ID"; }
+  aws cloudwatch --region "$REGION" delete-alarms --alarm-names "$NAME-reboot" "$NAME-recover" 2>/dev/null || true
   SG=$(sg_id); [ -n "$SG" ] && { ec2 delete-security-group --group-id "$SG"; echo "deleted security group $SG"; }
   echo "nothing left running" ;;
 *) echo "usage: deploy/aws.sh up | status | down"; exit 2 ;;

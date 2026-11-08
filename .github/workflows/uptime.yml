@@ -1,0 +1,27 @@
+name: uptime
+# Checks the live demo (URL in deploy/live_url) every 30 minutes with a real prediction. A failed run makes GitHub email the repo owner.
+on:
+  schedule: [{ cron: "*/30 * * * *" }]
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Health, deployed commit and a real /check
+        run: |
+          URL=$(cat deploy/live_url)
+          for i in 1 2 3; do H=$(curl -sf -m 20 "$URL/health") && break; sleep 30; done
+          [ -n "${H:-}" ] || { echo "::error::$URL/health is not answering"; exit 1; }
+          echo "health: $H"
+          DEPLOYED=$(echo "$H" | jq -r .commit); MAIN=$(git rev-parse --short=7 HEAD)
+          [ "$DEPLOYED" = "$MAIN" ] || echo "::warning::live demo runs $DEPLOYED, main is $MAIN (the server deploys new commits after CI passes, about 10-15 minutes)"
+          python3 - "$URL" <<'PY'
+          import json, sys, time, urllib.request
+          st = "<h3>Constraints</h3><ul><li>2 \\leq N \\leq 200000</li><li>1 \\leq A_i \\leq 10^9</li></ul>"
+          body = json.dumps({"code": open("tleye/examples/p02779_slow.cpp").read(), "language": "C++", "statement_html": st, "time_limit_ms": 2000}).encode()
+          t = time.time()
+          r = json.load(urllib.request.urlopen(urllib.request.Request(sys.argv[1] + "/check", body, {"Content-Type": "application/json"}), timeout=120))
+          print(f"check: {r['outcome']} p={r['p_tle_model']} server {r['elapsed_ms']} ms, round trip {time.time() - t:.1f} s")
+          assert r["outcome"] == "SUSPECTED TLE" and r["p_tle_model"] > 0.9, r
+          PY
