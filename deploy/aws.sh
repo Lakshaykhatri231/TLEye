@@ -5,7 +5,7 @@ set -euo pipefail
 NAME=tleye-demo
 TYPE=${TYPE:-t4g.medium}               # ARM, 2 vCPU, 4 GB: the LoRA service needs about 2.4 GB
 DISK_GB=${DISK_GB:-20}
-REGION=$(aws configure get region)
+REGION=${REGION:-$(aws configure get region)}   # new-experience AWS projects only allow their home region (e.g. REGION=ap-southeast-2)
 ec2() { aws ec2 --region "$REGION" "$@"; }
 
 instance_id() { ec2 describe-instances --filters "Name=tag:Name,Values=$NAME" "Name=instance-state-name,Values=pending,running,stopping,stopped" \
