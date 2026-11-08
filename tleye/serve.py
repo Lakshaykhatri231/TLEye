@@ -99,3 +99,11 @@ def health() -> dict:
 @app.post("/check")
 def check_endpoint(req: CheckRequest) -> dict:
     return run(req)
+
+
+if os.environ.get("TLEYE_DEMO") == "1":          # also serve the web demo at /, sharing this process's model (one copy in memory)
+    import gradio as gr
+
+    import tleye.app as demo
+    demo.CACHE, demo.MODEL_CHOICE = CACHE, MODEL
+    app = gr.mount_gradio_app(app, demo.build_ui(), path="/")

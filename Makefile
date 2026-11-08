@@ -1,4 +1,4 @@
-.PHONY: setup test lint eval data sandbox-test sandbox-images headline serve image data-manifest verify-data weights space
+.PHONY: setup test lint eval data sandbox-test sandbox-images headline serve image data-manifest verify-data weights space aws-up aws-status aws-down
 
 PY=.venv/bin/python -I -m
 
@@ -73,3 +73,12 @@ space:          ## assemble the Hugging Face Space (needs a PRO account to host 
 	rm -rf data/scratch/space && mkdir -p data/scratch/space/kaggle/lib data/scratch/space/models
 	cp space/* LICENSE data/scratch/space/ && cp kaggle/lib/kernel_lib.py data/scratch/space/kaggle/lib/
 	rsync -a --exclude __pycache__ tleye data/scratch/space/ && rsync -a models/b2 data/scratch/space/models/
+
+aws-up:         ## public demo on one EC2 server (uses your `aws configure`); builds the pushed commit
+	deploy/aws.sh up
+
+aws-status:
+	deploy/aws.sh status
+
+aws-down:       ## remove the server and its security group
+	deploy/aws.sh down
