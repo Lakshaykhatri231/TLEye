@@ -6,3 +6,4 @@ Sequential POST /check requests on the two example solutions in tleye/examples (
 |---|---|---|---|---|---|---|
 | Docker on M2 (Colima, 4 CPU, 3 GB) | b2m | 60 | 4 | 6 | 6 | fast: SUSPECTED TLE (0.4224); slow: SUSPECTED TLE (0.9033) |
 | Docker on M2 (Colima, 4 CPU, 3 GB) | lora | 60 | 596 | 1098 | 1203 | fast: LIKELY AC (0.0392); slow: SUSPECTED TLE (0.9927) |
+| AWS EC2 t8i.small (Intel, 2 GB), Sydney, bfloat16; client in India | lora | 60 | 797 | 917 | 952 | fast: LIKELY AC (0.0383); slow: SUSPECTED TLE (0.9927) |

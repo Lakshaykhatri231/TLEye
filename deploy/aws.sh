@@ -3,8 +3,8 @@
 # up: creates a security group (port 80 only, no SSH) and one server that builds and runs the pushed commit. down: removes both.
 set -euo pipefail
 NAME=tleye-demo
-TYPE=${TYPE:-t4g.small}                # ARM, 2 vCPU, 2 GB, free-plan eligible; the model runs in 16-bit with 4 GB swap
-DTYPE=${DTYPE:-float16}                # same verdicts as float32 on 64 test rows (max prob change 0.003); float32 needs ~2.4 GB
+TYPE=${TYPE:-t8i.small}                # Intel, 2 GB, free-plan eligible; bfloat16 runs ~0.3 s/check (ARM t4g.small took 132 s: no fast 16-bit math)
+DTYPE=${DTYPE:-bfloat16}               # same verdicts as float32 on 64 test rows (max prob change 0.02); float32 needs ~2.4 GB
 DISK_GB=${DISK_GB:-20}
 REGION=${REGION:-$(aws configure get region)}   # new-experience AWS projects only allow their home region (e.g. REGION=ap-southeast-2)
 ec2() { aws ec2 --region "$REGION" "$@"; }

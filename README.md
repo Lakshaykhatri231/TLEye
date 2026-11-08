@@ -18,6 +18,8 @@ input 'asc.txt' used 3.95s CPU (limit 2s) in the sandbox; measured on THIS machi
 | **SUSPECTED TLE** | the model flags it, but no generated input failed; not reported as safe |
 | **LIKELY AC** | the model does not flag it; an estimate, not a proof |
 
+**Live demo:** http://3.26.12.43 (AWS, while the free credits last; the hosted version gives verdicts only, certificates run locally).
+
 ![TLEye web demo: a CERTIFIED TLE with the sandbox runs and the code summary checked against the AST](docs/demo.png)
 
 <details><summary>Options and built-in examples</summary>
@@ -102,6 +104,7 @@ curl -s localhost:8000/check -H 'Content-Type: application/json' \
 
 `GET /health` reports the loaded model; `POST /check` returns the same result as the CLI. Certificates are disabled in the service because
 they need a Docker daemon. Measured latency: [`reports/serving.md`](reports/serving.md).
+`make aws-up` / `make aws-status` / `make aws-down` run the same container on one EC2 server (`deploy/aws.sh`; set `REGION` for AWS projects tied to one region).
 
 ## Reproducing
 
