@@ -1,5 +1,8 @@
 # TLEye
 
+[![ci](https://github.com/Lakshaykhatri231/TLEye/actions/workflows/ci.yml/badge.svg)](https://github.com/Lakshaykhatri231/TLEye/actions/workflows/ci.yml)
+[![uptime](https://github.com/Lakshaykhatri231/TLEye/actions/workflows/uptime.yml/badge.svg)](https://github.com/Lakshaykhatri231/TLEye/actions/workflows/uptime.yml)
+
 Predicts whether a competitive-programming solution (C++, Java or Python) will get **Time Limit Exceeded**, and tries to confirm it by
 generating a worst-case input and running the program in a sandbox.
 
@@ -18,7 +21,7 @@ input 'asc.txt' used 3.95s CPU (limit 2s) in the sandbox; measured on THIS machi
 | **SUSPECTED TLE** | the model flags it, but no generated input failed; not reported as safe |
 | **LIKELY AC** | the model does not flag it; an estimate, not a proof |
 
-**Live demo:** http://13.239.4.189 (AWS, while the free credits last; the hosted version gives verdicts only, certificates run locally).
+**Live demo:** http://13.239.4.189 (AWS EC2, Sydney; verdicts and code summary only, certificates run locally).
 
 ![TLEye web demo: a CERTIFIED TLE with the sandbox runs and the code summary checked against the AST](docs/demo.png)
 
@@ -102,16 +105,34 @@ curl -s localhost:8000/check -H 'Content-Type: application/json' \
   -d '{"code": "...", "language": "C++", "statement_html": "<h3>Constraints</h3>...", "time_limit_ms": 2000}'
 ```
 
-`GET /health` reports the loaded model; `POST /check` returns the same result as the CLI. Certificates are disabled in the service because
-they need a Docker daemon. Measured latency: [`reports/serving.md`](reports/serving.md).
-`make aws-up` / `make aws-status` / `make aws-down` run the same container on one EC2 server (`deploy/aws.sh`; set `REGION` for AWS projects tied to one region).
+`GET /health` reports the model, deployed commit, uptime and request counts; `POST /check` returns the same result as the CLI.
+Certificates are disabled in the service because they need a Docker daemon. Measured latency: [`reports/serving.md`](reports/serving.md).
 
-Operations of the live demo:
-- **Continuous deployment:** the server checks GitHub every 5 minutes and deploys a new `main` commit only after all three CI jobs pass;
-  a version that fails its health check is rolled back (`deploy/updater.sh`). No cloud credentials are stored on GitHub.
-- **Monitoring:** a scheduled workflow runs a real prediction against the demo every 30 minutes and fails (GitHub emails the owner) if it
-  is down or wrong (`.github/workflows/uptime.yml`); `/health` reports the deployed commit, uptime and request counts; CloudWatch alarms
-  reboot or recover the server if AWS's status checks fail; the app's and the deployer's logs go to CloudWatch Logs (`/tleye/demo`, kept 14 days).
+## Deployment and operations
+
+```
+git push --> GitHub Actions CI: tests + AUROC gate | sandbox tests | container smoke test
+                 |
+                 v  all three green
+EC2 server polls GitHub every 5 min --> builds the commit --> health check --> live (or automatic rollback)
+                 |
+                 +--> CloudWatch Logs, CloudWatch alarms, uptime check every 30 min
+```
+
+| | how |
+|---|---|
+| Hosting | one AWS EC2 `t8i.small` (2 GB, Intel) running the container; model in bfloat16, same verdicts as float32 on 64 test rows |
+| Continuous deployment | the server deploys a new `main` commit only after all CI jobs pass, and rolls back if it fails its health check (`deploy/updater.sh`); no cloud credentials on GitHub |
+| Uptime monitoring | a scheduled workflow sends a real prediction every 30 minutes; a failure emails the owner (`.github/workflows/uptime.yml`) |
+| Self-repair | CloudWatch alarms reboot the server or move it to healthy hardware if AWS status checks fail |
+| Logs | app and deployer logs in CloudWatch Logs (`/tleye/demo`, kept 14 days) |
+| Model and data versions | adapter pinned to a Hugging Face revision with checksums (`make weights`); data pinned by checksums (`ci/data_manifest.json`) |
+
+```bash
+REGION=ap-southeast-2 make aws-up      # create the server (deploy/aws.sh; REGION = your AWS project's home region)
+REGION=ap-southeast-2 make aws-status  # address, health, alarms
+REGION=ap-southeast-2 make aws-down    # delete everything
+```
 
 ## Reproducing
 
@@ -140,9 +161,12 @@ tleye/features     tree-sitter code features
 tleye/models       LightGBM, LoRA and code-summary inference
 tleye/certify      input generation and sandbox runner
 tleye/eval         metrics and report scripts
+tleye/serve.py     HTTP API (FastAPI), also serves the web demo
+deploy/            EC2 deploy script, server setup, continuous-deployment updater
 kaggle/            GPU training and evaluation scripts
 reports/           generated reports and stored predictions
 tests/             tests
+.github/workflows/ CI (tests, sandbox, container) and the uptime check
 ```
 
 ## License
