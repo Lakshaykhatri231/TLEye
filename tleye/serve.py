@@ -89,6 +89,7 @@ WARMUP = CheckRequest(code="int main(){}", language="C++", statement_html="<h3>C
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     run(WARMUP)                  # load the model once at start-up, so /health reports a ready model
+    STATS.update(checks=0, failed=0, last_ms=None)   # the warm-up is not a visitor's request
     yield
 
 
