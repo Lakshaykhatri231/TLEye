@@ -23,6 +23,16 @@ R = Path("data/raw/extracted/Project_CodeNet")
 EXT = {".cpp": "C++", ".cc": "C++", ".cxx": "C++", ".java": "Java", ".py": "Python"}
 
 
+WHY_NO_CERTIFICATE = {     # plain-language reasons for tleye.certify.coverage categories
+    "no_input_section": "the statement has no Input format section, so inputs cannot be generated; paste the full statement, not just the constraints",
+    "special_io": "interactive or special input/output problems are not supported",
+    "unsupported_format": "the input format is not one the generator understands yet",
+    "unbounded_variable": "some input variables have no stated bound",
+    "unmodeled_text": "the constraints contain conditions the generator does not model, so a generated input might be invalid",
+    "semantic_risk": "the input has structure the generator does not build yet (e.g. trees, permutations, distinct values)",
+}
+
+
 def _shift(p: float, train_prev: float, deploy_prev: float) -> float:
     """Move a probability from the capped training prevalence to an assumed deployment prevalence (logit shift)."""
     import math
@@ -81,7 +91,8 @@ def check(sol: Path, language: str, runtime: str, html: str, time_limit_ms: floa
     cat, why = classify(html)
     out["certificate_support"] = {"category": cat, "detail": why}
     if cat != "simple":
-        out["detail"] = f"flagged; no certificate attempted: problem not supported yet ({cat}: {', '.join(why) or 'n/a'})"
+        reason = WHY_NO_CERTIFICATE.get(cat, f"problem not supported yet ({cat})")
+        out["detail"] = f"flagged; no certificate attempted: {reason}" + (f" ({', '.join(why)})" if why else "")
         return out
     sec = constraints_text(html) or ""
     try:

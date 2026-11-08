@@ -71,9 +71,6 @@ def run_check(code: str, language: str, python_runtime: str, problem_id: str, st
     if cert:
         md += ["", f"**Sandbox certificate:** {cert['status']} (measured on this machine's container, not the contest judge)", "",
                "| generated input | exit code | CPU seconds |", "|---|---|---|"] + [f"| {r['input']} | {r['rc']} | {r['cpu_s']:.2f} |" for r in cert["runs"]]
-    elif res.get("certificate_support"):
-        cs = res["certificate_support"]
-        md += ["", f"*No certificate attempted: problem category `{cs['category']}` {cs['detail'] or ''}.*"]
     if "explanation" in res:
         from tleye.models import explain
         md += ["", explain.render_markdown(res["explanation"])]
