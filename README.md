@@ -18,7 +18,7 @@ input 'asc.txt' used 3.95s CPU (limit 2s) in the sandbox; measured on THIS machi
 | **SUSPECTED TLE** | the model flags it, but no generated input failed; not reported as safe |
 | **LIKELY AC** | the model does not flag it; an estimate, not a proof |
 
-**Live demo:** http://3.26.12.43 (AWS, while the free credits last; the hosted version gives verdicts only, certificates run locally).
+**Live demo:** http://13.239.4.189 (AWS, while the free credits last; the hosted version gives verdicts only, certificates run locally).
 
 ![TLEye web demo: a CERTIFIED TLE with the sandbox runs and the code summary checked against the AST](docs/demo.png)
 
